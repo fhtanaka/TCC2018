@@ -67,6 +67,24 @@ li.dropdown {
     display: block;
 }
 
+* {
+    box-sizing: border-box;
+}
+
+.column {
+    float: left;
+    width: 30%;
+    padding: 5px;
+    margin-right: 5px;
+}
+
+/* Clearfix (clear floats) */
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
 </style>
 
 <head>
@@ -120,6 +138,23 @@ li.dropdown {
     O objetivo deste trabalho é desenvolver uma IA para o jogo de Hex utilizando-se de "Deep Q-learning". Inicialmente
     ela deve jogar em tabuleiros 4x4 e 5x5 e, se possível, progressivamente em tabuleiros de maior tamanho.
 
+</div>
+<br><br>
+
+<div class="row">
+    <div class="column">
+        <img src="tabuleiro.png" alt="tabuleiro" style="width:100%">
+        Exemplo de Tabuleiro
+    </div>
+
+    <div class="column">
+     
+    </div>
+
+    <div class="column">
+        <img src="vitoria.jpg" alt="vitoria" style="width:100%">
+        Exemplo de vitória do azul
+    </div>
 </div>
 
 
