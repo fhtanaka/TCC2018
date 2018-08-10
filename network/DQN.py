@@ -1,16 +1,6 @@
-import math
-import time
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.nn.functional as F
-import torchvision.transforms as T
-from itertools import count
-from PIL import Image
-from memory import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -42,41 +32,28 @@ class DQN(nn.Module):
         layer_count=0
         for in_features, out_features in zip(config.conv_layers, config.conv_layers[1:]):
             self.add_module("conv_layer"+str(layer_count), 
-                nn.Sequential (
-                    nn.Conv2d (in_features, out_features, kernel_size=config.kernel[layer_count], padding=1),
-                    nn.ReLU()
-                )
+                    nn.Conv2d (in_features, out_features, kernel_size=config.kernel[layer_count], padding=1)
             )    
             layer_count+=1
 
         #nn_layers = neural networks layer
         
         #layer inicial que sai diretamente da conv
-        self.add_module("nn_layer0", 
-                nn.Sequential(
-                    nn.Linear(discover_flat_size(config), config.nn_layers[0]),
-                    nn.ReLU()
-                )
-            )
+        self.add_module("nn_layer0", nn.Linear(discover_flat_size(config), config.nn_layers[0]))
         if len(config.nn_layers) > 1:
             #layers intermediarias
             layer_count=1
-            for in_features, out_features in zip(config.nn_layers, config.nn_layers[1:-1]):
-                self.add_module("nn_layer"+str(layer_count), 
-                    nn.Sequential(
-                        nn.Linear(in_features, out_features),
-                        nn.ReLU()
-                    )
-                )
+            for in_features, out_features in zip(config.nn_layers, config.nn_layers[1:]):
+                self.add_module("nn_layer"+str(layer_count), nn.Linear(in_features, out_features))
                 layer_count+=1
-            #layer final, sem ReLu
-            self.add_module("nn_layer"+str(layer_count), nn.Sequential(nn.Linear(config.nn_layers[-2], config.nn_layers[-1])))
 
     def forward(self, x):
-        for layer in self._modules:
-            print(layer)
-            print(x.size())
-            x = self._modules[layer](x)
+        # print(self._modules)
+        layers_names = list(self._modules)
+        for layer in layers_names[:-1]:
+            print(layer, '->', x.size())
+            x = F.relu(self._modules[layer](x))
+        x = self._modules[layers_names[-1]](x)
         return x
 
 

@@ -18,4 +18,5 @@ class config():
 conf = config()
 dqn = DQN(conf)
 x = torch.zeros([config.batch_size, config.channels, config.height, config.width])
-dqn.forward(x)
+print(dqn.forward(x)[0][0][0])
+# tensor([-0.2889, -0.0611], grad_fn=<SelectBackward>)
