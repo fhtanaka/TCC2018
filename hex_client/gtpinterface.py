@@ -2,7 +2,7 @@ import sys
 # from resistanceAgent import resistanceAgent
 # from networkAgent import networkAgent
 # from treeNetAgent import treeNetAgent
-from gamestate import gamestate
+from .gamestate import gamestate
 
 version = 0.1
 protocol_version = 2

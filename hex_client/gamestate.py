@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from unionfind import unionfind
+from .unionfind import *
 
 class gamestate:
 	"""

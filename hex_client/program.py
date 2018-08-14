@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from gtpinterface import gtpinterface
+from .gtpinterface import gtpinterface
 import sys
 
 def main():
