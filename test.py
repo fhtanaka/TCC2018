@@ -2,8 +2,8 @@ from config import config
 from network import *
 from player_agents import *
 from hex_client import *
-import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib
+# import matplotlib.pyplot as plt
 
 print("Iniciando")
 
@@ -71,9 +71,9 @@ file.write("\n\n")
 file.close 
 print("Win percentage: " + str(wins/test_episodes))
 print("Max consecutives wins: " + str(max_momentum))
-plt.ylim(0, test_episodes)
-plt.plot(plot)
-plt.show()
+# plt.ylim(0, test_episodes)
+# plt.plot(plot)
+# plt.show()
 
 
 

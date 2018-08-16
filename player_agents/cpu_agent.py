@@ -25,7 +25,7 @@ class cpu_player():
         # connected to the right
 
         #matrix = np.dstack((board, board))
-        matrix = torch.zeros((1, 2, size, size))
+        matrix = torch.zeros((1, 2, size, size), device=device)
         matrix[0][0] = matrix[0][1] = board
         matrix[0][0][matrix[0][0]==2] = 0
         matrix[0][1][matrix[0][0]==1] = 0
@@ -49,8 +49,9 @@ class cpu_player():
         eps_threshold = self.config.EPS_END + (self.config.EPS_START - self.config.EPS_END) * math.exp(-1. * self.steps_done / self.config.EPS_DECAY)
         self.steps_done += 1
         if sample > eps_threshold or optimal:
+            board = self.preprocess(state)
             with torch.no_grad():
-                return self.policy_net(self.preprocess(state)).max(1)[1].view(1, 1)
+                return self.policy_net(board).max(1)[1].view(1, 1)
         else:
             return torch.tensor([[random.randrange(self.config.board_size**2)]], device=device, dtype=torch.long)
 
@@ -108,11 +109,11 @@ class cpu_player():
         try:
             gamestate.play(self.action_to_play(action))
             if (gamestate.winner() == 0):
-                return (True, False, torch.tensor((+1,)))
+                return (True, False, torch.tensor((+1,), device=device))
             if(gamestate.winner() == player):
-                return (True, True, torch.tensor((+150,)))
+                return (True, True, torch.tensor((+150,), device=device))
             else:
-                return (True, True, torch.tensor((-150,)))
+                return (True, True, torch.tensor((-150,), device=device))
 
         except ValueError:
-            return (False, False, torch.tensor((-100,))) 
+            return (False, False, torch.tensor((-100,), device=device)) 
