@@ -1,0 +1,56 @@
+\chapter{Embasamento Teórico (nome temporario)}
+\label{cap:embasamento_teorico}
+\section{Aprendizado por Reforço}
+\quad Aprendizado por reforço é um campo do aprendizado de máquina onde um
+agente aprende como interagir com o ambiente por meio de tentativa e erro, 
+isso é, aplicando ações e observando os resultados.\\
+
+\quad Em cada passo o agente recebe do ambiente o estado em que se encontra e
+então seleciona uma ação para se tomar, após isso o ambiente retorna dois
+valores, o novo estado que o agente está e uma recompensa, que pode ser
+tanto positiva quanto negativa, que avalia o quão boa foi a ação realizada. Este
+processo então é repetido até que o ambiente devolva um estado terminal e assim
+finalize o episódio.\\
+
+\quad O modelo acima é formalizado matematicamente utilizando um MDP 
+(\textit{Markov Decision Process})
+
+\subsection{Markov Decision Process}
+\quad Um MDP é um processo estocástico onde  a distribuição de probabilidade do
+próximo estado depende apenas do estado atual e não na sequência de eventos
+ que  o precederam. Esta característica é chamada de Markoviana e nela só se interessa
+ o estado imediato. O aprendizado por reforço pode ser modelado utilizando um MDP 
+ da seguinte forma:
+ 
+ \begin{itemize}
+ 	\item Um conjunto de estados $S$ tal que cada estado $s_{i} \in S$
+ 	\item Um conjunto de ações $A$ tal que cada ação $a_{i} \in A$
+ 	\item Uma função de recompensa $R$ que recebe como entrada um par (estado, ação)
+ 	\item Uma função P de probabilidade de transição dado um estado $s$ e uma ação $a$
+ \end{itemize}
+ \newpage
+
+\quad A imagem a seguir ilustra o funcionamento deste modelo:
+\begin{figure}[htb]
+\centering
+\includegraphics[width=12cm]{figuras/reinforcement_learning}
+\caption{\label{fig:reinforcement_learning}Substituir por imagem pt BR}
+\end{figure}
+
+\quad A partir destas definições podemos definir também uma política $\pi$ ,
+isso é, uma função que dado um certo estado devolve a ação que se deve tomar.
+Com conhecimento destes conceitos o modelo é iterado da seguinte forma :
+
+\begin{algorithm}[]
+ Comece por um estado inicial $s_{0}$ e com tempo $t=0$\;
+ \Enqto {$s_{t}$ não for terminal}{
+	Selecione uma ação $a_{t}$ a partir da política $\pi$\;
+	Realize a ação $a_{t}$ com probabilidade $P(s_{t}, a_{t})$\;
+	Ambiente calcula a recompensa $r_{t} = R(s_{t}, a_{t})$\;
+	Ambiente calcula o novo estado $s_{t+1}$\;
+	Agente recebe o estado $s_{t+1}$ e a recompensa $r_{t}$\;
+}
+\end{algorithm}
+
+\quad O objetivo deste modelo é achar uma política $\pi^{*}$ que seja eficaz,
+ou seja, maximize a recompensa acumulada: $\sum_{t=0} \gamma^{t}r_{t}$
