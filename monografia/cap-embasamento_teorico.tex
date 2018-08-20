@@ -18,9 +18,9 @@ finalize o episódio.\\
 \subsection{Markov Decision Process}
 \quad Um MDP é um processo estocástico onde  a distribuição de probabilidade do
 próximo estado depende apenas do estado atual e não na sequência de eventos
- que  o precederam. Esta característica é chamada de Markoviana e nela só se interessa
- o estado imediato. O aprendizado por reforço pode ser modelado utilizando um MDP 
- da seguinte forma:
+que  o precederam. Esta característica é chamada de Markoviana e nela só se interessa
+o estado imediato. O aprendizado por reforço pode ser modelado utilizando um MDP 
+da seguinte forma:
  
  \begin{itemize}
  	\item Um conjunto de estados $S$ tal que cada estado $s_{i} \in S$
@@ -37,7 +37,7 @@ próximo estado depende apenas do estado atual e não na sequência de eventos
 \caption{\label{fig:reinforcement_learning}Substituir por imagem pt BR}
 \end{figure}
 
-\quad A partir destas definições podemos definir também uma política $\pi$ ,
+\quad A partir destas definições pode-se definir também uma política $\pi$ ,
 isso é, uma função que dado um certo estado devolve a ação que se deve tomar.
 Com conhecimento destes conceitos o modelo é iterado da seguinte forma :
 
@@ -52,5 +52,20 @@ Com conhecimento destes conceitos o modelo é iterado da seguinte forma :
 }
 \end{algorithm}
 
-\quad O objetivo deste modelo é achar uma política $\pi^{*}$ que seja eficaz,
-ou seja, maximize a recompensa acumulada: $\sum_{t=0} \gamma^{t}r_{t}$
+\quad O objetivo deste modelo é maximizar a recompensa acumulada 
+$\sum_{t=0} \gamma^{t}r_{t}$ onde $\gamma$ é um fator de desconto 
+entre 0 e 1 que indica o quão mais importante são as recompensas imediatas.
+
+\quad A partir disso o valor de certa política $\pi$ em um estado $s$ pode 
+ser definido como:
+\begin{center}
+$V_{\pi}(s) = E[\sum_{t=0} \gamma^{t}r_{t}|s_{0}=s, \pi]$\\
+\end{center}
+\quad E portanto busca-se uma política $\pi^{*}$ que maximize esse valor para um 
+estado inicial.
+
+\subsection{Q-learning}
+\quad O valor de uma ação $a_{t}$ em dado estado $s_{t}$ é definida pela função:
+\begin{center}
+$Q(s_{t},a_{t})=E[\sum_{t=0} \gamma^{t}r_{t}|s_{0}=s_{t}, a_{0}=a_{t}, \pi]$
+\end{center}
