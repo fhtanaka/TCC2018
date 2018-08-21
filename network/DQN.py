@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
 
 def num_flat_features(x):
     size = x.size()[1:]  
@@ -29,16 +30,22 @@ class DQN(nn.Module):
 
         super(DQN, self).__init__()
 
-        #layer iniciaç
-        self.add_module("conv_layer0", 
-            nn.Conv2d (config.channels, config.conv_layers[0], kernel_size=config.kernel[0], padding=1)
+        #layer inicial
+        self.add_module("conv_layer0",
+            nn.Sequential(
+                nn.Conv2d (config.channels, config.conv_layers[0], kernel_size=config.kernel[0], padding=1),
+                nn.BatchNorm2d(config.conv_layers[0])
+            ) 
         )
         if len(config.conv_layers) > 1:
             layer_count=1   
             for in_features, out_features in zip(config.conv_layers, config.conv_layers[1:]):
-                self.add_module("conv_layer"+str(layer_count), 
-                    nn.Conv2d (in_features, out_features, kernel_size=config.kernel[layer_count], padding=1)
-                )    
+                self.add_module("conv_layer"+str(layer_count),
+                    nn.Sequential(
+                        nn.Conv2d (in_features, out_features, kernel_size=config.kernel[layer_count], padding=1),
+                        nn.BatchNorm2d(out_features)    
+                    )
+                )
                 layer_count+=1
         
         #layer inicial que sai diretamente da conv

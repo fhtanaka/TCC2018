@@ -9,3 +9,4 @@ monografia/monografia_template.log
 monografia/monografia_template.out
 monografia/monografia_template.pdf
 monografia/monografia_template.toc
+*.pyc
