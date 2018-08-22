@@ -6,8 +6,8 @@ agente aprende como interagir com o ambiente por meio de tentativa e erro,
 isso é, aplicando ações e observando os resultados.\\
 
 \quad Em cada passo o agente recebe do ambiente o estado em que se encontra e
-então seleciona uma ação para se tomar, após isso o ambiente retorna dois
-valores, o novo estado que o agente está e uma recompensa, que pode ser
+então seleciona uma ação para  tomar. Após isso o ambiente retorna dois
+valores: o novo estado que o agente está e uma recompensa, que pode ser
 tanto positiva quanto negativa, que avalia o quão boa foi a ação realizada. Este
 processo então é repetido até que o ambiente devolva um estado terminal e assim
 finalize o episódio.\\
@@ -58,7 +58,7 @@ entre 0 e 1 que indica o quão mais importante são as recompensas imediatas.
 A partir disso o valor de certa política $\pi$ em um estado $s$ pode 
 ser definido como:
 \begin{center}
-$V_{\pi}(s) = E[\sum_{t=0} \gamma^{t}r_{t}|s_{0}=s, \pi]$\\
+$V_{\pi}(s) = E[\sum\limits_{t=0} \gamma^{t}r_{t}|s_{0}=s, \pi]$\\
 \end{center}
 
 E portanto busca-se uma política $\pi^{*}$ que maximize esse valor para um 
@@ -68,7 +68,7 @@ estado inicial.
 \quad Em Q-learning é importante definir o valor de uma ação $a_{t}$ em dado 
 estado $s_{t}$ e para isso é utilizada a seguinte função:
 \begin{center}
-$Q^{\pi}(s_{t},a_{t})=E[\sum_{t=0} \gamma^{t}r_{t}|s_{0}=s_{t}, a_{0}=a_{t}, \pi]$
+$Q^{\pi}(s_{t},a_{t})=E[\sum\limits_{t=0} \gamma^{t}r_{t}|s_{0}=s_{t}, a_{0}=a_{t}, \pi]$
 \end{center}
 
 \quad Quando essa função $Q$ é ótima a chamamos de $Q^{*}$ e ela satisfaz à 
@@ -87,10 +87,23 @@ ação.\\
 \quad Esta função é recursiva e pode-se a usar para iterar sobre a função Q para aproxima-la
 de $Q^{*}$ da seguinte forma: $Q(s_{t},a_{t})\leftarrow r_{t} + \gamma max_{a} Q(s_{t+1},a)]$.\\
 
-\quad O problema desta aproximação é que é necessário mapear o valor de todos
+\quad O problema desta abordagem é que é necessário mapear o valor de todos
 os estados e isso é muito ineficiente quando se trata de espaços muitos grandes.
 No Hex, por exemplo, mesmo um tabuleiro 5x5 que é considerado pequeno tem 
 847288609443 estados possíveis já que cada espaço do tabuleiro pode ter 1 dos
 três possíveis valores: vazio, ocupado por peça preta e ocupado por peça branca.
 Devido a esse problema são utilizada redes neurais profundas para realizar o 
 aprendizado.
+
+\section{Aprendizado por Reforço Profundo}
+\quad Aprendizado profundo é um campo do aprendizado de máquina que tem como
+objetivo extrair características (features) diretamente dos dados. Para isso ele
+se baseia em abstrações de alto nível que utilizam grafos para representar 
+as várias camadas de processamento. Neste projeto serão utilizadas redes neurais
+convolucionais (CNNs) como a arquitetura de aprendizado profundo.
+
+\subsection{Redes Neurais}
+\quad Antes de se aprofundar em CNNs é importante ter conhecimento do
+funcionamento de redes neurais.
+
+
