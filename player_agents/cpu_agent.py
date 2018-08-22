@@ -2,8 +2,9 @@ import torch.optim as optim
 from network import *
 import math
 
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device="cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device="cpu"
+print(device)
 class cpu_player():
     def __init__(self, config):
 
