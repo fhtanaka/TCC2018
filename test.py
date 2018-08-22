@@ -7,19 +7,18 @@ from hex_client import *
 
 print("Iniciando")
 
-training_episodes = 1000
-test_episodes = 100
-board_size = 5
+training_episodes = 10000
+test_episodes = 1000
 wins = 0
 momentum = 0
 max_momentum = 0
 
 config = config()
-cpu = cpu_player("white", board_size, config)
+cpu = cpu_player(config)
 
 for i in range(training_episodes):
     print("training: ", i)
-    game = gamestate(board_size)
+    game = gamestate(config.board_size)
     turn = 0
     while (game.moves() != [] and game.winner() == 0):
         if (turn%2 == 0):

@@ -5,7 +5,7 @@ import math
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device="cpu"
 class cpu_player():
-    def __init__(self, color, board_size, config):
+    def __init__(self, config):
 
         self.config = config
         self.policy_net = DQN(self.config).to(device)
