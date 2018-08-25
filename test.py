@@ -37,7 +37,7 @@ for i in range(training_episodes):
 plot = []
 for i in range (test_episodes):
     print("test: ", i)
-    game = gamestate(board_size)
+    game = gamestate(config.board_size)
     turn = 0
     while (game.moves() != [] and game.winner() == 0):
         if (turn%2 == 0):

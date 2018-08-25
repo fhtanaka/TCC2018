@@ -14,7 +14,7 @@ class cpu_player():
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
         self.optimizer = optim.RMSprop(self.policy_net.parameters())
-        self.memory = ReplayMemory(10000)
+        self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
 
     def preprocess(self, gamestate):
@@ -67,13 +67,13 @@ class cpu_player():
         batch = Transition(*zip(*transitions))
 
         # Compute a mask of non-final states and concatenate the batch elements
-        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                              batch.next_state)), device=device, dtype=torch.uint8)
+        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=device, dtype=torch.uint8)
 
-        if [s for s in batch.next_state if s is not None] == []:
+        non_final_next_states  = [s for s in batch.next_state if s is not None]
+        if non_final_next_states  == []:
             return
         else:
-            non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
+            non_final_next_states = torch.cat(non_final_next_states )
 
         state_batch = torch.cat(batch.state)
         action_batch = torch.cat(batch.action)

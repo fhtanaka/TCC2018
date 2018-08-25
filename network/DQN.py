@@ -9,19 +9,6 @@ def num_flat_features(x):
         num_features *= s
     return num_features
 
-def discover_flat_size(config):
-    x = torch.zeros([config.channels, config.height, config.width])
-    cont=1
-    conv2d = nn.Conv2d(config.channels, config.conv_layers[0], kernel_size=config.kernel[0], padding=0)
-    x = F.relu(conv2d(x))
-    for in_features, out_features in zip(config.conv_layers, config.conv_layers[1:]):
-        conv2d = nn.Conv2d (in_features, out_features, kernel_size=config.kernel[cont], padding=0)
-        x = F.relu(conv2d(x))
-        cont+=1
-
-    return len(x.view(-1, num_flat_features(x))[0])
-    # return  len(x.view(-1, num_flat_features(x))[0])
-
 class DQN(nn.Module):
     def __init__(self, config):
 
