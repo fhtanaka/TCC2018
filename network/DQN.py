@@ -15,7 +15,7 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
 
         #layer inicial
-        flat_features_size = config.board_size - (config.kernel[0]-1)
+        flat_features_size = (config.board_size+2*config.padding) - (config.kernel[0]-1)
         self.add_module("conv_layer0",
             nn.Sequential(
                 nn.Conv2d (config.channels, config.conv_layers[0], kernel_size=config.kernel[0], padding=0),

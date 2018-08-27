@@ -134,6 +134,18 @@ class gamestate:
 		else:
 			raise ValueError("No possible plays")
 
+	def preprocess(self):
+		size = self.size
+		matrix = np.zeros((1, 2, size, size))
+		matrix[0][0] = matrix[0][1] = self.board
+		matrix[0][0][matrix[0][0]==2] = 0
+		matrix[0][1][matrix[0][0]==1] = 0
+		return matrix # Returns here to not add any padding
+
+	def legal_actions(self):
+		possible_plays = np.argwhere(self.board==0)
+		return possible_plays
+
 
 	def __str__(self):
 		"""

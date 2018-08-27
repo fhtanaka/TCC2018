@@ -2,11 +2,11 @@ import torch.optim as optim
 from network import *
 import math
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 #device="cpu"
-print(device)
+
 class cpu_player():
-    def __init__(self, config):
+    def __init__(self, config, device):
 
         self.config = config
         self.policy_net = DQN(self.config).to(device)
@@ -16,45 +16,39 @@ class cpu_player():
         self.optimizer = optim.RMSprop(self.policy_net.parameters())
         self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
+        self.device=device
 
-    def preprocess(self, gamestate):
-        size = gamestate.size
-        board = torch.from_numpy(gamestate.board)
-        # 2 channels, one for each color
-        # Neurohex use 6 channels: white pieces, black pieces, white pieces connected to the top,
-        # white pieces connected to the bottom, black pieces connected to the left and black pieces
-        # connected to the right
+    def explore_exploit(self):
+        sample = random.random()
+        eps_threshold = self.config.EPS_END + (self.config.EPS_START - self.config.EPS_END) * math.exp(-1. * self.steps_done / self.config.EPS_DECAY)
+        self.steps_done += 1
+        return sample > eps_threshold
 
-        #matrix = np.dstack((board, board))
-        matrix = torch.zeros((1, 2, size, size), device=device)
-        matrix[0][0] = matrix[0][1] = board
-        matrix[0][0][matrix[0][0]==2] = 0
-        matrix[0][1][matrix[0][0]==1] = 0
-        return matrix # Returns here to not add any padding
-
-        # padUD = torch.full((2, 2, size+4), 1)
-        # padLR = torch.full((2, size, 2), 2)
-        # matrix = torch.cat((matrix, padLR), 2)
-        # matrix = torch.cat((padLR, matrix), 2)
-        # matrix = torch.cat((matrix, padUD), 1)
-        # matrix = torch.cat((padUD, matrix), 1)
-        # aux = torch.empty(1,2,size+4, size+4)
-        # aux[0] = matrix
-        # return aux 
+    def np_to_torch(self, nparray):
+        tensor=torch.from_numpy(nparray)
+        tensor = torch.tensor(tensor, device=self.device, dtype=torch.long)
+        return tensor
 
     # sometimes use our model for choosing the action, and sometimes we’ll just sample one uniformly. 
     # The probability of choosing a random action will start at EPS_START and will decay exponentially towards EPS_END. 
     # EPS_DECAY controls the rate of the decay
     def select_action(self, state, optimal=False):
-        sample = random.random()
-        eps_threshold = self.config.EPS_END + (self.config.EPS_START - self.config.EPS_END) * math.exp(-1. * self.steps_done / self.config.EPS_DECAY)
-        self.steps_done += 1
-        if sample > eps_threshold or optimal:
-            board = self.preprocess(state)
+        if self.explore_exploit() or optimal:
             with torch.no_grad():
-                return self.policy_net(board).max(1)[1].view(1, 1)
+                net = self.policy_net(state)
+                return net.max(1)[1].view(1, 1)
         else:
-            return torch.tensor([[random.randrange(self.config.board_size**2)]], device=device, dtype=torch.long)
+            return torch.tensor([[random.randrange(self.config.board_size**2)]], device=self.device, dtype=torch.long)
+
+    def select_valid_action(self, state, valid_actions, optimal=False):
+        valid= list(map(self.tuple_to_action, valid_actions))
+        if self.explore_exploit() or optimal:
+            with torch.no_grad():
+                net = self.policy_net(state)
+                action=valid[net[0][valid].max(0)[1]]
+        else:
+            action=random.choice(valid)
+        return torch.tensor([[action]], device=self.device, dtype=torch.long)
 
 
 
@@ -67,7 +61,7 @@ class cpu_player():
         batch = Transition(*zip(*transitions))
 
         # Compute a mask of non-final states and concatenate the batch elements
-        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=device, dtype=torch.uint8)
+        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=self.device, dtype=torch.uint8)
 
         non_final_next_states  = [s for s in batch.next_state if s is not None]
         if non_final_next_states  == []:
@@ -84,7 +78,7 @@ class cpu_player():
         state_action_values = self.policy_net(state_batch).gather(1, action_batch)
 
         # Compute V(s_{t+1}) for all next states.
-        next_state_values = torch.zeros(self.config.batch_size, device=device)
+        next_state_values = torch.zeros(self.config.batch_size, device=self.device)
         next_state_values[non_final_mask] = self.target_net(non_final_next_states).max(1)[0].detach()
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.config.GAMMA) + reward_batch.float()
@@ -99,22 +93,25 @@ class cpu_player():
             param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
 
-    def action_to_play(self, action):
-        i = int(action/self.config.board_size)
-        j = int(action%self.config.board_size)
+    def action_to_tuple(self, action):
+        i = int(action/self.config.board_size)+self.config.padding
+        j = int(action%self.config.board_size)+self.config.padding
         return (i,j)
+
+    def tuple_to_action(self, tuple):
+        return (tuple[0]-self.config.padding)*self.config.board_size+(tuple[1]-self.config.padding)
 
 
     # return valid, end, reward
     def reward(self, gamestate, action, player):
         try:
-            gamestate.play(self.action_to_play(action))
+            gamestate.play(self.action_to_tuple(action))
             if (gamestate.winner() == 0):
-                return (True, False, torch.tensor((+1,), device=device))
+                return (True, False, torch.tensor((+1,), device=self.device))
             if(gamestate.winner() == player):
-                return (True, True, torch.tensor((+150,), device=device))
+                return (True, True, torch.tensor((+150,), device=self.device))
             else:
-                return (True, True, torch.tensor((-150,), device=device))
+                return (True, True, torch.tensor((-150,), device=self.device))
 
         except ValueError:
-            return (False, False, torch.tensor((-100,), device=device)) 
+            return (False, False, torch.tensor((-100,), device=self.device)) 

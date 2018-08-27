@@ -1,5 +1,9 @@
 network/__pycache__
+neurohex_client/__pycache__
+hex_client/__pycache__
 __pycache__
+*.pyc
+
 resultado.txt
 monografia/cap-embasamento_teorico.log
 monografia/cap-introducao.log
@@ -10,4 +14,3 @@ monografia/monografia_template.out
 monografia/monografia_template.pdf
 monografia/monografia_template.toc
 monografia/monografia_template.synctex.gz
-*.pyc

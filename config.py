@@ -1,8 +1,8 @@
 class config():
     # game config
-    color = "black"
+    color = "white"
     board_size = 5
-
+    padding = 1 # size of padding for neurohex_client
     # netowrk config
     channels = 2
     conv_layers = [2, 4] # Size of convolutional layers
