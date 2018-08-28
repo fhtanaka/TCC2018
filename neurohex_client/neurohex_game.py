@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 import random
 
 white = 0
@@ -25,7 +26,8 @@ This game representation uses 6 channels as follows:
 '''
 class neurohex_game:
 
-    def __init__(self, size, padding, board=None):
+    def __init__(self, size, padding, device, board=None):
+        self.device=device
         self.size = size
         self.padding = padding
         self.input_size = size+2*padding
@@ -98,6 +100,16 @@ class neurohex_game:
             return black
         return None
 
+    #return 1 if color wins, -1 if it loses and 0 otherwise
+    def is_winner(self, color):
+        winner = self.winner()
+        if (color==winner):
+            return 1
+        elif (other(color)==winner):
+            return -1
+        else:
+            return 0
+
     def flood_fill(self, cell, color, edge):
         self.board[edge, cell[0], cell[1]] = 1
         for n in self.neighbors(cell):
@@ -135,8 +147,14 @@ class neurohex_game:
             self.to_play=white
 
     def preprocess(self):
-        new_board=np.zeros((1, 6,self.input_size,self.input_size))
-        new_board[0] = self.board*1
+        '''
+        This function adds one dimension to the board and converts it to torch.tensor
+        It also converts bool to int in the process
+        '''
+        new_board = torch.zeros((1, 6, self.input_size, self.input_size))
+        tensor=torch.from_numpy(self.board*1)
+        tensor = torch.tensor(tensor, device=self.device, dtype=torch.float)
+        new_board[0] = tensor
         return new_board
 
     def legal_actions(self):
@@ -164,6 +182,12 @@ class neurohex_game:
                 self.play((i,j))
         else:
             raise ValueError("No possible plays")
+
+    def is_cell_empty(self, cell):
+        if (self.board[white, cell[0], cell[1]]==False and self.board[black, cell[0], cell[1]]==False):
+            return True
+        else:
+            return False
 
     def __str__(self):
         """

@@ -2,6 +2,12 @@ import numpy as np
 import random
 from .unionfind import *
 
+def other(color):
+    if (color==1):
+        return 2
+    else:
+        return 1
+
 class gamestate:
 	"""
 	Stores information representing the current state of a game of hex, namely
@@ -105,6 +111,17 @@ class gamestate:
 			return self.PLAYERS["black"]
 		else:
 			return self.PLAYERS["none"]
+
+	#return 1 if color wins, -1 if it loses and 0 otherwise
+	def is_winner(self, color):
+		winner = self.winner()
+		if (color==winner):
+			return 1
+		elif (other(color)==winner):
+			return -1
+		else:
+			return 0
+
 
 	def neighbors(self, cell):
 		"""
