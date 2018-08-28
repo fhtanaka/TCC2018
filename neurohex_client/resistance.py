@@ -127,7 +127,6 @@ def resistance(game, empty, color):
 
 	return Il, C
 
-
 def score(game, color):
 	current_credit = 2
 	"""
@@ -142,8 +141,6 @@ def score(game, color):
 	#filled_fraction = (boardsize**2-num_empty+1)/boardsize**2
 	I1, C1 = resistance(game, empty, color)
 	I2, C2 = resistance(game, empty, other(color))
-	print(C1)
-	print(C2)
 
 	num_empty, empty = get_empty(game)
 	for cell in empty:
@@ -156,7 +153,7 @@ def score(game, color):
 		else:
 			Q[cell] = min(1,max(-1,C1_prime/C2_prime - 1))
 
-	output = -1*np.ones((boardsize, boardsize))
+	output = -1*np.ones((game.size, game.size))
 	for cell, value in Q.items():
 		output[cell[0]-game.padding, cell[1]-game.padding] = value
 	return output

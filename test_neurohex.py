@@ -30,8 +30,8 @@ class config():
 
 print("Iniciando")
 
-training_episodes = 10000
-test_episodes = 1000
+training_episodes = 100000
+test_episodes = 10000
 wins = 0
 momentum = 0
 max_momentum = 0
@@ -56,8 +56,11 @@ for i in range(training_episodes):
                 cpu.memory.push(state, action, next_state, reward)
                 cpu.optimize_model()
         else:
-            game.random_play()
+            values = score(game, black)
+            action = values.argmax()
+            game.play(game.action_to_tuple(action))
         turn += 1
+    print("winner: ", game.winner(), "\n")
 
 plot = []
 for i in range (test_episodes):
@@ -69,7 +72,7 @@ for i in range (test_episodes):
             valid = False
             while not valid:
                 state =np_to_torch(game.preprocess())
-                action = cpu.select_valid_action(state, game.legal_actions(), optimal=True)
+                action = cpu.select_valid_action(state, game.legal_actions(), optimal=False)
                 valid, end, reward = cpu.reward(game, action, 1)
                 next_state =np_to_torch( game.preprocess()) if valid else None
                 cpu.memory.push(state, action, next_state, reward)
@@ -77,8 +80,9 @@ for i in range (test_episodes):
         else:
             game.random_play()
         turn += 1
+    print("winner: ", game.winner(), "\n")
     print(game)
-    if (game.winner()==1):
+    if (game.winner()==0):
         wins+=1
         momentum +=1
         if (momentum > max_momentum):

@@ -145,10 +145,16 @@ class neurohex_game:
         possible_plays = np.array([x for x in set(tuple(x) for x in black_plays) & set(tuple(x) for x in white_plays)])
         return possible_plays
 
+    def action_to_tuple(self, action):
+        i = int(action/self.size)+self.padding
+        j = int(action%self.size)+self.padding
+        return (i,j)
+
+    def tuple_to_action(self, tuple):
+        return (tuple[0]-self.padding)*self.size+(tuple[1]-self.padding)
+
     def random_play(self, color=None):
         #np.array([x for x in set(tuple(x) for x in black) & set(tuple(x) for x in white)])
-
-
         possible_plays = self.legal_actions()
         if possible_plays.shape[0] != 0:
             i, j = random.choice(possible_plays)

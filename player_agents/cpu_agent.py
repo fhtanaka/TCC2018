@@ -45,7 +45,7 @@ class cpu_player():
         if self.explore_exploit() or optimal:
             with torch.no_grad():
                 net = self.policy_net(state)
-                action=valid[net[0][valid].max(0)[1]]
+                action=valid[net[0][valid].max(0)[1]] # Select the action with max values from the indexes in valid_actions
         else:
             action=random.choice(valid)
         return torch.tensor([[action]], device=self.device, dtype=torch.long)
@@ -103,12 +103,12 @@ class cpu_player():
 
 
     # return valid, end, reward
-    def reward(self, gamestate, action, player):
+    def reward(self, game, action, player):
         try:
-            gamestate.play(self.action_to_tuple(action))
-            if (gamestate.winner() == 0):
+            game.play(self.action_to_tuple(action))
+            if (game.winner() == 0):
                 return (True, False, torch.tensor((+1,), device=self.device))
-            if(gamestate.winner() == player):
+            if(game.winner() == player):
                 return (True, True, torch.tensor((+150,), device=self.device))
             else:
                 return (True, True, torch.tensor((-150,), device=self.device))
