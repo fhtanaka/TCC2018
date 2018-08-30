@@ -189,6 +189,64 @@ class neurohex_game:
         else:
             return False
 
+
+    def str_colorless(self):
+        """
+        Print an ascii representation of the input.
+        """
+        w = 'O'
+        b = '@'
+        empty = '.'
+        end_color = ""
+        edge1_color = ""
+        edge2_color = ""
+        both_color =  ""
+        invalid = '#'
+        ret = '\n'
+        coord_size = len(str(self.size))
+        offset = 1
+        ret+=' '*(offset+2)
+        for x in range(self.input_size):
+            if(x<self.padding or x>=self.size+self.padding):
+                ret+=' '*(offset*2+1)
+            else:
+                ret+=chr(ord('A')+(x-self.padding))+' '*offset*2
+        ret+='\n'
+        for y in range(self.input_size):
+            if(y<self.padding or y>=self.size+self.padding):
+                ret+=' '*(offset*2+coord_size)
+            else:
+                ret+=str(y+1-self.padding)+' '*(offset*2+coord_size-len(str(y+1-self.padding)))
+            for x in range(self.input_size):
+                if(self.board[white, x, y] == 1):
+                    if(self.board[west, x, y] == 1 and self.board[east, x, y]):
+                        ret+=both_color
+                    elif(self.board[west, x,y]):
+                        ret+=edge1_color
+                    elif(self.board[east, x, y]):
+                        ret+=edge2_color
+                    if(self.board[black, x, y] == 1):
+                        ret+=invalid
+                    else:
+                        ret+=w
+                    ret+=end_color
+                elif(self.board[black, x, y] == 1):
+                    if(self.board[north, x, y] == 1 and self.board[south, x, y]):
+                        ret+=both_color
+                    elif(self.board[north, x,y]):
+                        ret+=edge1_color
+                    elif(self.board[south, x, y]):
+                        ret+=edge2_color
+                    ret+=b
+                    ret+=end_color
+                else:
+                    ret+=empty
+                ret+=' '*offset*2
+            ret+="\n"+' '*offset*(y+1)
+        ret+=' '*(offset*2+1)+(' '*offset*2)*self.input_size
+
+        return ret  
+
     def __str__(self):
         """
         Print an ascii representation of the input.

@@ -3,6 +3,7 @@ neurohex_client/__pycache__
 hex_client/__pycache__
 __pycache__
 *.pyc
+*.txt
 
 resultado.txt
 monografia/cap-embasamento_teorico.log

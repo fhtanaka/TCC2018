@@ -76,17 +76,23 @@ class dqn_player():
         return torch.tensor([[action]], device=self.device, dtype=torch.long)
 
     def play_reward(self, action, state, next_state):
-        reward = torch.tensor((+1,), device=self.device)
+        reward = torch.tensor((0,), device=self.device, dtype=torch.long)
         self.memory.push(state, action, next_state, reward)
         self.optimize_model()
 
     def win_reward(self, action, state, next_state):
-        reward = torch.tensor((+150,), device=self.device)
+        reward = torch.tensor((+100,), device=self.device, dtype=torch.long)
         self.memory.push(state, action, next_state, reward)
         self.optimize_model()
 
     def lose_reward(self, action, state, next_state):
-        reward = torch.tensor((-150,), device=self.device)
+        reward = torch.tensor((-100,), device=self.device, dtype=torch.long)
+        self.memory.push(state, action, next_state, reward)
+        self.optimize_model()
+
+    def lose_reward_turn_influenced(self, action, state, next_state, turn):
+        r = -100 + turn*75/(self.board_size**2)
+        reward = torch.tensor((r,), device=self.device, dtype=torch.long)
         self.memory.push(state, action, next_state, reward)
         self.optimize_model()
 
