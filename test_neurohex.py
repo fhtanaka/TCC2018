@@ -4,6 +4,7 @@ from neurohex_client import *
 # import matplotlib
 # import matplotlib.pyplot as plt
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = "cpu"
 print(device)
 
 class config():
@@ -35,6 +36,7 @@ cpu = dqn_player(config, device)
 opponent = heuristic_player(cpu.opponent)
 
 print("Iniciando")
+if (device == "cuda"): cudnn.benchmark = True
 
 # Training Episodes:
 for i in range(training_episodes):

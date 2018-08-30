@@ -151,7 +151,7 @@ class neurohex_game:
         This function adds one dimension to the board and converts it to torch.tensor
         It also converts bool to int in the process
         '''
-        new_board = torch.zeros((1, 6, self.input_size, self.input_size))
+        new_board = torch.zeros((1, 6, self.input_size, self.input_size), device=self.device)
         tensor=torch.from_numpy(self.board*1)
         tensor = torch.tensor(tensor, device=self.device, dtype=torch.float)
         new_board[0] = tensor
