@@ -16,10 +16,9 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
     wins = 0
     momentum = 0
     max_momentum = 0
+    games_string=""
     plot=[]
-
-    if (filename != False):
-        file = open(filename, "w")
+        
 
     print("Beggining", opponent_method, " training of ", num_episodes, " episodes")
     for i in tqdm(range(num_episodes)):
@@ -49,18 +48,20 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             momentum = 0
         plot.append(wins)
 
-        if (filename != False and i%boards_to_print ==1):
-            file.write("\nGame " + str(i) + ":\n")
-            file.write("Winner: " + str(game.winner()))
-            file.write(game.str_colorless() + "\n")
+        if (i%boards_to_print ==1):
+            games_string += "\nGame " + str(i) + ":\n"
+            games_string += "Winner: " + str(game.winner())
+            games_string += game.str_colorless() + "\n"
 
 
     print("Win percentage: " + str(wins/num_episodes))
     print("Max consecutives wins: " + str(max_momentum) + "\n")
     if (filename != False):
+        file = open(filename, "w")
         file.write("\nWin percentage: " + str(wins/num_episodes))
         file.write("\nMax consecutives wins: " + str(max_momentum))
         file.write("\n\n")
+        file.write(games_string)
         # file.write(str(plot))
         file.write("\n\n")
         file.close 
