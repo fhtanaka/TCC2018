@@ -24,7 +24,7 @@ This game representation uses 6 channels as follows:
     black stone group connected to top edge
     black stone group connected to bottom edge
 '''
-class neurohex_game:
+class hex_game:
 
     def __init__(self, size, padding, device, board=None):
         self.device=device

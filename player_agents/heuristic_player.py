@@ -1,5 +1,5 @@
 import random
-from neurohex_client import *
+from game_model import *
 
 class heuristic_player():
     def __init__(self, color):

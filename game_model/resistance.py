@@ -1,5 +1,5 @@
 import numpy as np
-from neurohex_client.neurohex_game import *
+from game_model.hex_game import *
 import sys
 
 white = 0

@@ -1,10 +1,8 @@
 import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 training_regime = [
-    (100, "random", False, -1),
-    (100, "eletric", False, -1),
-    (100, "random", "random.txt", 10),
-    (100, "eletric", "eletric.txt", 10)
+    (100, "eletric", "eletric.txt", 10),
+    (100, "random", "random.txt", 10)
 ]
 # test_regime=
 

@@ -1,6 +1,6 @@
 from network import *
 from player_agents import *
-from neurohex_client import *
+from game_model import *
 from config import *
 from tqdm import tqdm
 # import matplotlib
@@ -22,7 +22,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
 
     print("Beggining", opponent_method, " training of ", num_episodes, " episodes")
     for i in tqdm(range(num_episodes), desc=opponent_method+" training (" + str(num_episodes)+ ")"):
-        game = neurohex_game(player_model.board_size, player_model.padding, device)
+        game = hex_game(player_model.board_size, player_model.padding, device)
         turn = 0
         while (game.winner() == None):
             if (turn%2 == player_model.color):

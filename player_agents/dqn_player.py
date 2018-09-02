@@ -78,7 +78,7 @@ class dqn_player():
     def play_reward(self, action, state, next_state):
         reward = torch.tensor((0,), device=self.device, dtype=torch.long)
         self.memory.push(state, action, next_state, reward)
-        self.optimize_model()
+        # self.optimize_model()
 
     def win_reward(self, action, state, next_state):
         reward = torch.tensor((+100,), device=self.device, dtype=torch.long)
