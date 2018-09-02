@@ -48,6 +48,9 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             momentum = 0
         plot.append(wins)
 
+        if (i%cpu.target_update == 0):
+            cpu.optimize_target_net()
+
         if (i%boards_to_print ==1):
             games_string += "\nGame " + str(i) + ":\n"
             games_string += "Winner: " + str(game.winner())

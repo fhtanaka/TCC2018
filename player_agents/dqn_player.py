@@ -16,12 +16,13 @@ class dqn_player():
         else:
             self.opponent = 0
 
-        self.EPS_END = config.EPS_END
-        self.EPS_START = config.EPS_START
-        self.EPS_END = config.EPS_END
-        self.EPS_DECAY = config.EPS_DECAY
-        self.GAMMA = config.GAMMA
+        self.eps_end = config.eps_end
+        self.eps_start = config.eps_start
+        self.eps_end = config.eps_end
+        self.eps_decay = config.eps_decay
+        self.gamma = config.gamma
         self.batch_size = config.batch_size
+        self.target_update = config.target_update
 
         # This part is for the network
         self.policy_net = DQN(config).to(device)
@@ -46,12 +47,12 @@ class dqn_player():
 
     '''
     Sometimes use our model for choosing the action, and sometimes we’ll just sample one uniformly. 
-    The probability of choosing a random action will start at EPS_START and will decay exponentially towards EPS_END. 
-    EPS_DECAY controls the rate of the decay
+    The probability of choosing a random action will start at eps_start and will decay exponentially towards eps_end. 
+    eps_decay controls the rate of the decay
     '''
     def explore_exploit(self):
         sample = random.random()
-        eps_threshold = self.EPS_END + (self.EPS_START - self.EPS_END) * math.exp(-1. * self.steps_done / self.EPS_DECAY)
+        eps_threshold = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
         self.steps_done += 1
         return sample > eps_threshold
 
@@ -96,11 +97,14 @@ class dqn_player():
         self.memory.push(state, action, next_state, reward)
         self.optimize_model()
 
-    
+    def optimize_target_net(self):
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+
     def optimize_model(self):
         if len(self.memory) < self.batch_size:
             return
         transitions = self.memory.sample(self.batch_size)
+
         # Transpose the batch (see http://stackoverflow.com/a/19343/3343043 for
         # detailed explanation).
         batch = Transition(*zip(*transitions))
@@ -126,7 +130,7 @@ class dqn_player():
         next_state_values = torch.zeros(self.batch_size, device=self.device)
         next_state_values[non_final_mask] = self.target_net(non_final_next_states).max(1)[0].detach()
         # Compute the expected Q values
-        expected_state_action_values = (next_state_values * self.GAMMA) + reward_batch.float()
+        expected_state_action_values = (next_state_values * self.gamma) + reward_batch.float()
 
         # Compute Huber loss
         loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
