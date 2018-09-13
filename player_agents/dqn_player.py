@@ -4,7 +4,7 @@ import math
 
 #This player plays based on a Deep Q-learning Network
 class dqn_player():
-    def __init__(self, config, device):
+    def __init__(self, config, device, model=False):
 
         self.device=device
 
@@ -25,7 +25,12 @@ class dqn_player():
         self.target_update = config.target_update
 
         # This part is for the network
-        self.policy_net = DQN(config).to(device)
+        if (model != False):
+            self.policy_net = torch.load(model)
+        else:
+            self.policy_net = DQN(config).to(device)
+        
+        # Be aware that the config must be the exact same for the loaded model
         self.target_net = DQN(config).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()

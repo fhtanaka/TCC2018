@@ -20,7 +20,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
     plot=[]
         
 
-    print("Beggining", opponent_method, " training of ", num_episodes, " episodes")
+    print("Beginning", opponent_method, " training of ", num_episodes, " episodes")
     for i in tqdm(range(num_episodes), desc=opponent_method+" training (" + str(num_episodes)+ ")"):
         game = hex_game(player_model.board_size, player_model.padding, device)
         turn = 0
