@@ -1,15 +1,14 @@
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+# device = "cpu"
 white = 0
 black = 1
 
 training_regime = [
-    (100, "random", False, -1),
-    (100, "eletric", False, -1)
+    (1000, "random", False, -1),
+    (1000, "eletric", False, -1)
 ]
-# test_regime=
 
 
 class config ():
