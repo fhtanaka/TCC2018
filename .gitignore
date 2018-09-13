@@ -6,7 +6,10 @@ __pycache__
 *.txt
 
 resultado.txt
+*.pt
 config.py
+
+
 monografia/cap-embasamento_teorico.log
 monografia/cap-introducao.log
 monografia/monografia_template.aux

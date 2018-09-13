@@ -14,42 +14,30 @@ class DQN(nn.Module):
 
         super(DQN, self).__init__()
 
-        #layer inicial
+        #initial layer
         flat_features_size = (config.board_size+2*config.padding) - (config.kernel[0]-1)
         self.add_module("conv_layer0",
-            nn.Sequential(
-                nn.Conv2d (config.channels, config.conv_layers[0], kernel_size=config.kernel[0], padding=0),
-                nn.BatchNorm2d(config.conv_layers[0])
-            ) 
+                nn.Conv2d (config.channels, config.conv_layers[0], kernel_size=config.kernel[0], padding=0)
         )
+
         if len(config.conv_layers) > 1:
             layer_count=1   
             for in_features, out_features in zip(config.conv_layers, config.conv_layers[1:]):
                 self.add_module("conv_layer"+str(layer_count),
-                    nn.Sequential(
-                        nn.Conv2d (in_features, out_features, kernel_size=config.kernel[layer_count], padding=0),
-                        nn.BatchNorm2d(out_features)    
-                    )
+                        nn.Conv2d (in_features, out_features, kernel_size=config.kernel[layer_count], padding=0)
                 )
                 flat_features_size -= config.kernel[layer_count]-1
                 layer_count+=1
         
-        #layer inicial que sai diretamente da conv
-        self.add_module("nn_layer0", nn.Linear((flat_features_size**2)*config.conv_layers[-1], config.board_size**2))
-        # if len(config.nn_layers) > 1:
-        #     #layers intermediarias
-        #     layer_count=1
-        #     for in_features, out_features in zip(config.nn_layers, config.nn_layers[1:]):
-        #         self.add_module("nn_layer"+str(layer_count), nn.Linear(in_features, out_features))
-        #         layer_count+=1
-        # self.add_module("final_layer", nn.Linear(config.nn_layers[-1], config.board_size**2))
+        #full connected layer that connects the last conv layer to the Q-values
+        self.add_module("full_connected_layer", nn.Linear((flat_features_size**2)*config.conv_layers[-1], config.board_size**2))
 
     def forward(self, x):
-        # print(self._modules)
         layers_names = list(self._modules)
         for layer in layers_names[:-1]:
             x = F.relu(self._modules[layer](x))
         
+        # This next line flat the vector tranforming the 3d tensor in a 1d
         x = x.view(-1, num_flat_features(x))
         x = self._modules[layers_names[-1]](x)
 

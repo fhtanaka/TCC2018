@@ -70,10 +70,13 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         file.close 
 
 
-config = config()
+config = config(white)
+
 print(device)
 if (device == "cuda"): cudnn.benchmark = True
 
 cpu = dqn_player(config, device)
 for ep in training_regime:
     training(cpu, ep[0], ep[1], ep[2], ep[3])
+
+torch.save(cpu.policy_net, 'white_train.pt')
