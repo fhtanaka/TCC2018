@@ -6,8 +6,7 @@ white = 0
 black = 1
 
 training_regime = [
-    (1000, "random", False, -1),
-    (1000, "eletric", False, -1)
+    (1000, "eletric", 'eletric.txt', 2)
 ]
 
 
@@ -23,9 +22,9 @@ class config ():
         self.kernel= [2, 2] # Size of the kernel in the conv layers
         #pool = [1, 1] # Size of the pooling
         # nn_layers = [8] # Size of the neural netowrk layers
-        self.batch_size = 32
+        self.batch_size = 128
         self.target_update = 25
-        self.replay_memory=100
+        self.replay_memory = 500
         self.gamma = 0.999
         self.eps_start = 0.9
         self.eps_end = 0.05

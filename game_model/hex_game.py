@@ -26,7 +26,7 @@ This game representation uses 6 channels as follows:
 '''
 class hex_game:
 
-    def __init__(self, size, padding, device, board=None):
+    def __init__(self, size, padding, device, board=np.empty(0)):
         self.device=device
         self.size = size
         self.padding = padding
@@ -34,7 +34,7 @@ class hex_game:
         self.input_shape = (6,self.input_size,self.input_size)
         self.to_play=white
 
-        if (board != None):
+        if (board.any()):
             self.board=board
             return
 
@@ -146,14 +146,22 @@ class hex_game:
             self.play_cell(cell, black)
             self.to_play=white
 
+    '''
+    This function adds one dimension to the board and converts it to torch.tensor
+    It also converts bool to int in the process
+    '''
     def preprocess(self):
-        '''
-        This function adds one dimension to the board and converts it to torch.tensor
-        It also converts bool to int in the process
-        '''
-        new_board = torch.zeros((1, 6, self.input_size, self.input_size), device=self.device)
         tensor=torch.from_numpy(self.board*1)
         tensor = torch.tensor(tensor, device=self.device, dtype=torch.float)
+        
+        new_board = torch.zeros((1, 6, self.input_size, self.input_size), device=self.device)
+        new_board[0] = tensor
+        return new_board
+
+    def mirrored_preprocess(self):
+        tensor=torch.from_numpy(self.mirror_board()*1)
+        tensor = torch.tensor(tensor, device=self.device, dtype=torch.float)
+        new_board = torch.zeros((1, 6, self.input_size, self.input_size), device=self.device)
         new_board[0] = tensor
         return new_board
 
@@ -180,6 +188,7 @@ class hex_game:
                 self.play_cell((i,j), color)
             else:
                 self.play((i,j))
+            return (i,j)
         else:
             raise ValueError("No possible plays")
 

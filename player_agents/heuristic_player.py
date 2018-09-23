@@ -6,9 +6,10 @@ class heuristic_player():
         self.color = color
 
     def random_play(self, game):
-        game.random_play()
+        return game.tuple_to_action(game.random_play())
 
     def eletric_resistence_play(self, game):
         values = score(game, self.color)
         action = values.argmax()
         game.play(game.action_to_tuple(action))
+        return action

@@ -134,6 +134,7 @@ class dqn_player():
         # Compute V(s_{t+1}) for all next states.
         next_state_values = torch.zeros(self.batch_size, device=self.device)
         next_state_values[non_final_mask] = self.target_net(non_final_next_states).max(1)[0].detach()
+        
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch.float()
 
