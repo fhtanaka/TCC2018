@@ -215,18 +215,18 @@ class hex_game:
         coord_size = len(str(self.size))
         offset = 1
         ret+=' '*(offset+2)
-        for x in range(self.input_size):
+        for x in range(1, self.input_size-1):
             if(x<self.padding or x>=self.size+self.padding):
                 ret+=' '*(offset*2+1)
             else:
                 ret+=chr(ord('A')+(x-self.padding))+' '*offset*2
         ret+='\n'
-        for y in range(self.input_size):
+        for y in range(1, self.input_size-1):
             if(y<self.padding or y>=self.size+self.padding):
                 ret+=' '*(offset*2+coord_size)
             else:
                 ret+=str(y+1-self.padding)+' '*(offset*2+coord_size-len(str(y+1-self.padding)))
-            for x in range(self.input_size):
+            for x in range(1, self.input_size-1):
                 if(self.board[white, x, y] == 1):
                     if(self.board[west, x, y] == 1 and self.board[east, x, y]):
                         ret+=both_color
