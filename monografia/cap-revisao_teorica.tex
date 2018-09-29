@@ -1,5 +1,5 @@
-\chapter{Embasamento Teórico (nome temporario)}
-\label{cap:embasamento_teorico}
+\chapter{Revisão Teorica}
+\label{cap:revisao_teorica}
 \section{Aprendizado por Reforço}
 \quad Aprendizado por reforço é um campo do aprendizado de máquina onde um
 agente aprende como interagir com o ambiente por meio de tentativa e erro, 
@@ -15,8 +15,8 @@ finalize o episódio.\\
 \quad O modelo acima é formalizado matematicamente utilizando um MDP 
 (\textit{Markov Decision Process})
 
-\subsection{Markov Decision Process}
-\quad Um MDP é um processo estocástico onde  a distribuição de probabilidade do
+\subsection{Processos de Decisão Markovianos  (MDP)}
+\quad Um MDP (\textit{Markov Decision Process})  é um processo estocástico onde  a distribuição de probabilidade do
 próximo estado depende apenas do estado atual e não na sequência de eventos
 que  o precederam. Esta característica é chamada de Markoviana e nela só se interessa
 o estado imediato. O aprendizado por reforço pode ser modelado utilizando um MDP 
@@ -100,8 +100,74 @@ aprendizado.
 objetivo extrair características (features) diretamente dos dados. Para isso ele
 se baseia em abstrações de alto nível que utilizam grafos para representar 
 as várias camadas de processamento. Neste projeto serão utilizadas redes neurais
-convolucionais (CNNs) como a arquitetura de aprendizado profundo.
+convolucionais como a arquitetura de aprendizado profundo.
 
-\subsection{Redes Neurais}
-\quad Antes de se aprofundar em CNNs é importante ter conhecimento do
-funcionamento de redes neurais.
+\subsection{Redes Neurais Artificiais}
+
+\quad Uma rede neural artificial  (\textit{Artificial Neural Networks} - ANNs) 
+é um modelo computacional inspirado pelo funcionamento do cérebro no reino animal.
+A ideia deste sistema é que a partir de exemplos seja possível "aprender" e assim realizar tarefas.\\
+
+\quad Uma ANN é composta por unidades menores chamadas de neurônios que recebem
+um vetor de valores $X$, os multiplica por um vetor de pesos $W$ e os soma. Após isso é
+adicionado um viés $b$ e aplicada uma função de ativação $\theta$. Ou seja, o 
+neurônio realiza a operação $\theta (W^{T}X + b)$ e devolve o resultado. 
+Estas unidades  criam uma rede por camadas tal que a entrada
+de dado nível é a saída da camada anterior. 
+
+\begin{figure}[H]
+  \centering
+  \subfloat[Neurônio]{\includegraphics[width=0.4\textwidth]{neuron.png}\label{neuron}}
+  \hfill
+  \subfloat[Exemplo de ANN]{\includegraphics[width=0.4\textwidth]{ANN.jpeg}\label{ANN}}
+  \caption{Trocar por imagens originais.}
+\end{figure}
+
+\quad Esta rede então é treinada utilizando exemplos, isso é, seus pesos ($W$) e viés ($b$)
+são modificados com o intuito de diminuir o valor da função de erro que é calculada
+a partir da diferença entre a saida esperada e a saida da rede. Normalmente o algoritmo
+chamado de \textit{Backpropagation} é utilizado para alterar estes valores de forma a 
+se aproximar do mínimo de erro possível. 
+
+\quad O processo conhecido como aprendizado profundo (\textit{Deep Learning}) é o
+uso de ANNs com muitas camadas ocultas para assim modelar abstrações
+mais complexas.
+
+\subsection{Redes Neurais Convolucionais}
+
+\quad Redes neurais convolucionais (\textit{Convolutional Neural Networks} - CNNs) 
+são uma classe de ANNs do tipo \textit{feed forward} (quando as conexões entre 
+os neurônios não formam ciclos) normalmente utilizadas para a análise de imagens.
+O intuito de uma CNN é extrair e mapear caractrísticas da entrada para facilitar
+o processamento dos dados.\\
+
+\quad Na construção de uma CNN são realizadas 4 operações: convolução, aplicação
+de função não-linear (ReLU), \textit{pooling} e classificação. As 3 primeiras delas
+formam uma camada oculta (\textit{hidden layer}) e podem ser utilizadas repetidas
+vezes na construção do modelo.\\
+
+\quad A convolução é o processo que dá nome à rede e nela a ideia é extrair informação
+dos dados por meio da aplicação de um filtro (também chamado de \textit{kernel}).
+A operação é feita deslizando o filtro sobre a matriz de entrada e em cada posição
+os valores são multiplicados e então somados de forma a criar um novo valor
+no que é chamado de \textit{feature map}. Este processo pode ser visualizado na
+imagem abaixo.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=12cm]{figuras/convolution}
+\caption{\label{fig:convolution}Alterar legenda}
+\end{figure}
+
+\quad Após a convolução é aplicado em cada elemento uma função
+chamada de ReLU (\textit{Rectified Linear Unit}) tal que $ReLU(x) = max(0, x)$.
+Esta operação troca qualquer valor negativo por 0 e tem como objetivo tornar
+o dado não-linear pois assim ele fica mais próximo da realidade.\\
+
+\quad O processo de \textit{pooling} reduz a dimensão do \textit{feature map} tentando
+manter, ainda assim, as informações relevantes. O tipo mais comum é o \textit{max pooling}
+que seleciona o maior valor de certo intervalo do dado. O objetivo desta parte é
+diminuir o tamanho da amostra para agilizar o treinamento e prevenir o \textit{overfitting}.\\
+
+\quad Por fim é realizada a classificação do dado. Após a entrada ser processada pelas
+camadas anteriores o resultado é analisado e classificado por uma ANN.
