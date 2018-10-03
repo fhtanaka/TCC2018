@@ -3,15 +3,16 @@ from player_agents import *
 from game_model import *
 from config import *
 from tqdm import tqdm
-# import matplotlib
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 def training(player_model, num_episodes, opponent_method, filename=False, boards_to_print=-1):
-    opponent = heuristic_player(cpu.opponent)
+    opponent = heuristic_player(cpu.opponent, 0.5)
     if (opponent_method == "random"):
         opponent_play = opponent.random_play
     elif (opponent_method == "eletric"):
         opponent_play = opponent.eletric_resistence_play
+    elif (opponent_method == "mixed"):
+        opponent_play = opponent.mixed_play
 
     wins = 0
     momentum = 0
@@ -50,15 +51,15 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             turn += 1
         
         if (game.winner() == player_model.color):
-            cpu.win_reward_turn_influenced(action, state, next_state, turn)
-            cpu.lose_reward_turn_influenced(op_action, op_state, op_next_state, turn)
+            cpu.win_reward(action, state, next_state)
+            cpu.lose_reward(op_action, op_state, op_next_state)
             wins+=1
             momentum +=1
             if (momentum > max_momentum):
                 max_momentum = momentum
         else:
-            cpu.win_reward_turn_influenced(op_action, op_state, op_state, turn)
-            cpu.lose_reward_turn_influenced(action, state, next_state, turn)
+            cpu.win_reward(op_action, op_state, op_state)
+            cpu.lose_reward(action, state, next_state)
             momentum = 0
         plot.append(wins)
 
@@ -72,8 +73,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             # games_string += "Winner: " + str(game.winner())
             # games_string += game.str_colorless() + "\n"
 
-        if (i%1 == 0):
-            cpu.optimize_model()
+        cpu.optimize_model()
 
 
     print("Win percentage: " + str(wins/num_episodes))
@@ -87,6 +87,10 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         # file.write(str(plot))
         file.write("\n\n")
         file.close 
+
+    plt.ylim(0, num_episodes)
+    plt.plot(plot)
+    plt.show()
 
 
 config = config(white)

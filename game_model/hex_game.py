@@ -203,14 +203,14 @@ class hex_game:
         """
         Print an ascii representation of the input.
         """
-        w = 'O'
+        w = '#'
         b = '@'
         empty = '.'
         end_color = ""
         edge1_color = ""
         edge2_color = ""
         both_color =  ""
-        invalid = '#'
+        invalid = '*'
         ret = '\n'
         coord_size = len(str(self.size))
         offset = 1
@@ -260,14 +260,14 @@ class hex_game:
         """
         Print an ascii representation of the input.
         """
-        w = 'O'
+        w = '#'
         b = '@'
         empty = '.'
         end_color = '\033[0m'
         edge1_color = '\033[31m'
         edge2_color = '\033[32m'
         both_color =  '\033[33m'
-        invalid = '#'
+        invalid = '*'
         ret = '\n'
         coord_size = len(str(self.size))
         offset = 1

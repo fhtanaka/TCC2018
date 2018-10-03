@@ -7,11 +7,13 @@ from tqdm import tqdm
 # import matplotlib.pyplot as plt
 
 def training(player_model, num_episodes, opponent_method, filename=False, boards_to_print=-1):
-    opponent = heuristic_player(cpu.opponent)
+    opponent = heuristic_player(cpu.opponent, 0.5)
     if (opponent_method == "random"):
         opponent_play = opponent.random_play
     elif (opponent_method == "eletric"):
         opponent_play = opponent.eletric_resistence_play
+    elif (opponent_method == "mixed"):
+        opponent_play = opponent.mixed_play
 
     wins = 0
     momentum = 0

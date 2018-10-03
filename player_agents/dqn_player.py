@@ -57,8 +57,9 @@ class dqn_player():
     '''
     def explore_exploit(self):
         sample = random.random()
-        eps_threshold = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
-        self.steps_done += 1
+        # eps_threshold = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
+        # self.steps_done += 1
+        eps_threshold = self.eps_end
         return sample > eps_threshold
 
     # Selects an action disregard with its legality
