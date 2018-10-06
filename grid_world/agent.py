@@ -1,20 +1,16 @@
+from DQN import *
+from memory import *
 import torch.optim as optim
-from network import *
 import math
 
-#This player plays based on a Deep Q-learning Network
-class dqn_player():
+
+class grid_agent:
+
     def __init__(self, config, device, model=False):
 
         self.device=device
 
         self.board_size = config.board_size
-        self.padding = config.padding
-        self.color = config.color
-        if (self.color == 0):
-            self.opponent = 1
-        else:
-            self.opponent = 0
 
         self.eps_end = config.eps_end
         self.eps_start = config.eps_start
@@ -22,7 +18,6 @@ class dqn_player():
         self.eps_decay = config.eps_decay
         self.gamma = config.gamma
         self.batch_size = config.batch_size
-        self.target_update = config.target_update
 
         # This part is for the network
         if (model != False):
@@ -38,23 +33,6 @@ class dqn_player():
         self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
 
-    '''
-    In the network each space of the board is mapped to an intenger beetwen 0 and board_size^2
-    the next 2 functions translates the integer to the index of the board and vice-versa
-    '''
-    def action_to_index(self, action):
-        i = int(action/self.board_size)+self.padding
-        j = int(action%self.board_size)+self.padding
-        return (i,j)
-
-    def index_to_action(self, index):
-        return (index[0]-self.padding)*self.board_size+(index[1]-self.padding)
-
-    '''
-    Sometimes use our model for choosing the action, and sometimes we’ll just sample one uniformly. 
-    The probability of choosing a random action will start at eps_start and will decay exponentially towards eps_end. 
-    eps_decay controls the rate of the decay
-    '''
     def explore_exploit(self):
         sample = random.random()
         eps_threshold = self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1. * self.steps_done / self.eps_decay)
@@ -62,57 +40,28 @@ class dqn_player():
         # eps_threshold = self.eps_end
         return sample > eps_threshold
 
-    # Selects an action disregard with its legality
-    def select_action(self, state, optimal=False):
-        if (self.explore_exploit() or optimal):
+    def select_valid_action(self, state, valid, file):
+        
+        # print(state)
+        if (self.explore_exploit()):
             with torch.no_grad():
                 net = self.policy_net(state) # Returns the expected value of each action
-                return net.max(1)[1].view(1, 1)
-        else:
-            return torch.tensor([[random.randrange(self.board_size**2)]], device=self.device, dtype=torch.long)
-
-    # Selects a legal action
-    def select_valid_action(self, state, valid_actions, optimal=False):
-        valid = list(map(self.index_to_action, valid_actions)) #Converts the indexes (x,y) in actions z
-        if (self.explore_exploit() or optimal):
-            with torch.no_grad():
-                net = self.policy_net(state) # Returns the expected value of each action
+                file.write("Valid actions: " + str(valid) + "\n")
+                file.write("Action values: " + str(net[0]) + "\n")
                 action=valid[net[0][valid].max(0)[1]] # Select the action with max values from the indexes in valid_actions
         else:
+            file.write("Random action \n")
             action=random.choice(valid)
+
+        # print(action)
+        file.write("Chosen action: " +  str(action) + "\n")
         return torch.tensor([[action]], device=self.device, dtype=torch.long)
 
-    def play_reward(self, action, state, next_state):
-        reward = torch.tensor((0,), device=self.device, dtype=torch.long)
-        self.memory.push(state, action, next_state, reward)
-        # self.optimize_model()
+    def add_action(self, state, action, next_state, reward):
+        r = torch.tensor((reward,), device=self.device, dtype=torch.long)
+        self.memory.push(state, action, next_state, r)
 
-    def win_reward(self, action, state, next_state):
-        reward = torch.tensor((+100,), device=self.device, dtype=torch.long)
-        self.memory.push(state, action, next_state, reward)
-        # self.optimize_model()
-
-    def win_reward_turn_influenced(self, action, state, next_state, turn):
-        r = +100 - turn*50/(self.board_size**2)
-        reward = torch.tensor((r,), device=self.device, dtype=torch.long)
-        self.memory.push(state, action, next_state, reward)
-        # self.optimize_model()
-
-    def lose_reward(self, action, state, next_state):
-        reward = torch.tensor((-100,), device=self.device, dtype=torch.long)
-        self.memory.push(state, action, next_state, reward)
-        # self.optimize_model()
-
-    def lose_reward_turn_influenced(self, action, state, next_state, turn):
-        r = -100 + turn*50/(self.board_size**2)
-        reward = torch.tensor((r,), device=self.device, dtype=torch.long)
-        self.memory.push(state, action, next_state, reward)
-        # self.optimize_model()
-
-    def optimize_target_net(self):
-        self.target_net.load_state_dict(self.policy_net.state_dict())
-
-    def optimize_model(self):
+    def optimize(self):
         if len(self.memory) < self.batch_size:
             return
         transitions = self.memory.sample(self.batch_size)
@@ -155,3 +104,5 @@ class dqn_player():
             param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
 
+    def update_target_net(self):
+        self.target_net.load_state_dict(self.policy_net.state_dict())
