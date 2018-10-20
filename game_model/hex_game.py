@@ -166,14 +166,18 @@ class hex_game:
             self.play_cell(cell, black)
             self.to_play=white
 
-    def legal_actions(self):
+    # Returns the indexes that are possible to play (Where there is no piece)
+    def legal_indexes(self):
         white_plays = (self.board[white]==0).nonzero().numpy()
         black_plays = (self.board[black]==0).nonzero().numpy()
         possible_plays = np.array([x for x in set(tuple(x) for x in black_plays) & set(tuple(x) for x in white_plays)])
         return possible_plays
 
+    def legal_actions(self):
+        return list(map(self.index_to_action, self.legal_indexes()))
+
     def random_play(self, color=None):
-        possible_plays = self.legal_actions()
+        possible_plays = self.legal_indexes()
         if possible_plays.shape[0] != 0:
             i, j = random.choice(possible_plays)
             if (color != None):

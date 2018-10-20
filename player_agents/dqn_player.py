@@ -34,21 +34,10 @@ class dqn_player():
         self.target_net = DQN(config).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
-        self.optimizer = optim.RMSprop(self.policy_net.parameters())
+        self.optimizer = optim.RMSprop(self.policy_net.parameters(), momentum=0.1, lr=0.001)
+        self.criterion = torch.nn.SmoothL1Loss()
         self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
-
-    '''
-    In the network each space of the board is mapped to an intenger beetwen 0 and board_size^2
-    the next 2 functions translates the integer to the index of the board and vice-versa
-    '''
-    def action_to_index(self, action):
-        i = int(action/self.board_size)+self.padding
-        j = int(action%self.board_size)+self.padding
-        return (i,j)
-
-    def index_to_action(self, index):
-        return (index[0]-self.padding)*self.board_size+(index[1]-self.padding)
 
     '''
     Sometimes use our model for choosing the action, and sometimes we’ll just sample one uniformly. 
@@ -63,20 +52,20 @@ class dqn_player():
         return sample > eps_threshold
 
     # Selects an action disregard with its legality
-    def select_action(self, state, optimal=False):
+    def select_action(self, game, optimal=False):
         if (self.explore_exploit() or optimal):
             with torch.no_grad():
-                net = self.policy_net(state) # Returns the expected value of each action
+                net = self.policy_net(game.super_board) # Returns the expected value of each action
                 return net.max(1)[1].view(1, 1)
         else:
             return torch.tensor([[random.randrange(self.board_size**2)]], device=self.device, dtype=torch.long)
 
     # Selects a legal action
-    def select_valid_action(self, state, valid_actions, optimal=False):
-        valid = list(map(self.index_to_action, valid_actions)) #Converts the indexes (x,y) in actions z
+    def select_valid_action(self, game, optimal=False):
+        valid = game.legal_actions() #Converts the indexes (x,y) in actions z
         if (self.explore_exploit() or optimal):
             with torch.no_grad():
-                net = self.policy_net(state) # Returns the expected value of each action
+                net = self.policy_net(game.super_board) # Returns the expected value of each action
                 action=valid[net[0][valid].max(0)[1]] # Select the action with max values from the indexes in valid_actions
         else:
             action=random.choice(valid)
@@ -123,7 +112,6 @@ class dqn_player():
 
         # Compute a mask of non-final states and concatenate the batch elements
         non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=self.device, dtype=torch.uint8)
-
         non_final_next_states  = [s for s in batch.next_state if s is not None]
         if non_final_next_states  == []:
             return
@@ -146,7 +134,7 @@ class dqn_player():
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch.float()
 
         # Compute Huber loss
-        loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
+        loss = self.criterion(state_action_values, expected_state_action_values.unsqueeze(1))
 
         # Optimize the model
         self.optimizer.zero_grad()

@@ -1,40 +1,33 @@
+import sys
+sys.path.append('../')
 from network import *
 from player_agents import *
 from game_model import *
 from config import *
 from tqdm import tqdm
-# import matplotlib
-# import matplotlib.pyplot as plt
 
 def training(player_model, num_episodes, opponent_method, filename=False, boards_to_print=-1):
-    opponent = heuristic_player(cpu.opponent, 0.5)
-    if (opponent_method == "random"):
-        opponent_play = opponent.random_play
-    elif (opponent_method == "eletric"):
-        opponent_play = opponent.eletric_resistence_play
-    elif (opponent_method == "mixed"):
-        opponent_play = opponent.mixed_play
-
+    opponent = heuristic_player(cpu.opponent, opponent_method)
     wins = 0
     momentum = 0
     max_momentum = 0
     games_string=""
     plot=[]
-        
 
     print("Beginning", opponent_method, " training of ", num_episodes, " episodes")
     for i in tqdm(range(num_episodes), desc=opponent_method+" training (" + str(num_episodes)+ ")"):
         game = hex_game(player_model.board_size, player_model.padding, device)
+        game.change_color_print()
         turn = 0
         while (game.winner() == None):
             if (turn%2 == player_model.color):
-                state = game.preprocess()
-                action = cpu.select_valid_action(state, game.legal_actions())
-                game.play(cpu.action_to_index(action))
-                next_state = game.preprocess()
+                state = torch.tensor(game.super_board)
+                action = cpu.select_valid_action(game)
+                game.play(game.action_to_index(action))
+                next_state = torch.tensor(game.super_board)
 
             else:
-                opponent_play(game)
+                opponent.play(game)
                 if (game.winner() == None and turn != 0):
                     cpu.play_reward(action, state, next_state)
             turn += 1
@@ -56,7 +49,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         if (i%boards_to_print ==1):
             games_string += "\nGame " + str(i) + ":\n"
             games_string += "Winner: " + str(game.winner())
-            games_string += game.str_colorless() + "\n"
+            games_string += game.__str__() + "\n"
 
 
     print("Win percentage: " + str(wins/num_episodes))
@@ -72,14 +65,18 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         file.close 
 
 
-config = config(white)
+color = white
+save = False
 
 print(device)
 if (torch.cuda.is_available()):
     torch.backends.cudnn.benchmark = True
 
-cpu = dqn_player(config, device)
+cpu = dqn_player(config(white), device)
 for ep in training_regime:
-    training(cpu, ep[0], ep[1], ep[2], ep[3])
+    print(ep)
+    training(cpu, *ep)
+    
+if (save):
+    torch.save(cpu.policy_net, 'white_train.pt')
 
-# torch.save(cpu.policy_net, 'white_train.pt')

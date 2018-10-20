@@ -98,13 +98,10 @@ class grid_agent:
         
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch.float()
-        # print(next_state_values)
-        # print(reward_batch.float())
         
         # Compute Huber loss
         loss = self.criterion(state_action_values, expected_state_action_values.unsqueeze(1))
-        # print(state_action_values, expected_state_action_values.unsqueeze(1))
-        # print(loss, "\n")
+
         # Optimize the model
         self.optimizer.zero_grad()
         loss.backward()

@@ -9,6 +9,10 @@ def num_flat_features(x):
         num_features *= s
     return num_features
 
+def init_weights(m):
+    if type(m) == nn.Linear:
+        m.weight.data.fill_(1.0)
+
 class DQN(nn.Module):
     def __init__(self, config):
 
@@ -31,6 +35,9 @@ class DQN(nn.Module):
         
         #full connected layer that connects the last conv layer to the Q-values
         self.add_module("full_connected_layer", nn.Linear((flat_features_size**2)*config.conv_layers[-1], config.board_size**2))
+
+        for i in self.modules():
+            i.apply(init_weights)
 
     def forward(self, x):
         layers_names = list(self._modules)
