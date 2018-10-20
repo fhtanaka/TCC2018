@@ -148,7 +148,6 @@ def score(game, color):
 		#the conductance of the next game
 		C1_prime = C1 + I1[cell]**2/(3*(1-I1[cell]))
 		C2_prime = max(0,C2 - I2[cell])
-		print(C1_prime, C2_prime)
 
 		if(C1_prime>C2_prime):
 			Q[cell] = min(1,max(-1,1 - C2_prime/C1_prime))
@@ -156,7 +155,6 @@ def score(game, color):
 			Q[cell] = min(1,max(-1,C1_prime/C2_prime - 1))
 		else:
 			Q[cell] = 1
-		print ()
 
 	output = -1*np.ones((game.size, game.size))
 	for cell, value in Q.items():
