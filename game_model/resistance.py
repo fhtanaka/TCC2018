@@ -102,7 +102,7 @@ def resistance(game, empty, color):
 	#slightly hacky fix for rare case of isolated empty cells
 	#happens rarely and fix should be fine but could improve
 	except np.linalg.linalg.LinAlgError:
-		V = np.linalg.lstsq(G,I)[0]
+		V = np.linalg.lstsq(G,I, rcond=None)[0]
 
 	V_board = np.zeros((game.input_size, game.input_size))
 	for i in range(num_empty):
@@ -148,10 +148,15 @@ def score(game, color):
 		#the conductance of the next game
 		C1_prime = C1 + I1[cell]**2/(3*(1-I1[cell]))
 		C2_prime = max(0,C2 - I2[cell])
+		print(C1_prime, C2_prime)
+
 		if(C1_prime>C2_prime):
 			Q[cell] = min(1,max(-1,1 - C2_prime/C1_prime))
-		else:
+		elif (C2_prime != 0):
 			Q[cell] = min(1,max(-1,C1_prime/C2_prime - 1))
+		else:
+			Q[cell] = 1
+		print ()
 
 	output = -1*np.ones((game.size, game.size))
 	for cell, value in Q.items():

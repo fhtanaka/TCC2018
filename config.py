@@ -7,7 +7,7 @@ black = 1
 
 training_regime = [
     # (100000, "random", 'random.txt', 1000),
-    (100000, "mixed", 'mixed.txt', 100)
+    (100, "mixed", 'mixed.txt', 100)
 ]
 
 
