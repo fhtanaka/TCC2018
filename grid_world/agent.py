@@ -29,7 +29,8 @@ class grid_agent:
         self.target_net = DQN(config).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
-        self.optimizer = optim.RMSprop(self.policy_net.parameters())
+        self.optimizer = optim.RMSprop(self.policy_net.parameters(), momentum=0.1, lr=0.001)
+        self.criterion = torch.nn.SmoothL1Loss()
         self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
 
@@ -40,21 +41,26 @@ class grid_agent:
         # eps_threshold = self.eps_end
         return sample > eps_threshold
 
-    def select_valid_action(self, state, valid, file):
+    def select_valid_action(self, state, valid, file = False, optimal = False):
         
-        # print(state)
-        if (self.explore_exploit()):
+        net = self.policy_net(state) # Returns the expected value of each action
+        
+        if (file):
+            file.write(str(state) + "\n")
+            file.write("Valid actions: " + str(valid) + "\n")
+            file.write("Action values: " + str(net[0]) + "\n")
+        
+        if (self.explore_exploit() or optimal == True):
             with torch.no_grad():
-                net = self.policy_net(state) # Returns the expected value of each action
-                file.write("Valid actions: " + str(valid) + "\n")
-                file.write("Action values: " + str(net[0]) + "\n")
+                # print(net)
                 action=valid[net[0][valid].max(0)[1]] # Select the action with max values from the indexes in valid_actions
         else:
-            file.write("Random action \n")
+            if (file):
+                file.write("Random ")
             action=random.choice(valid)
-
-        # print(action)
-        file.write("Chosen action: " +  str(action) + "\n")
+        
+        if (file):
+            file.write("Chosen action: " +  str(action) + "\n\n")
         return torch.tensor([[action]], device=self.device, dtype=torch.long)
 
     def add_action(self, state, action, next_state, reward):
@@ -72,7 +78,6 @@ class grid_agent:
 
         # Compute a mask of non-final states and concatenate the batch elements
         non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=self.device, dtype=torch.uint8)
-
         non_final_next_states  = [s for s in batch.next_state if s is not None]
         if non_final_next_states  == []:
             return
@@ -83,8 +88,8 @@ class grid_agent:
         action_batch = torch.cat(batch.action)
         reward_batch = torch.cat(batch.reward)
 
-        # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
-        # columns of actions taken
+        # Compute Q(s_t, a)
+        # the model computes Q(s_t), then we select the columns of actions taken
         state_action_values = self.policy_net(state_batch).gather(1, action_batch)
 
         # Compute V(s_{t+1}) for all next states.
@@ -93,10 +98,13 @@ class grid_agent:
         
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch.float()
-
+        # print(next_state_values)
+        # print(reward_batch.float())
+        
         # Compute Huber loss
-        loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
-
+        loss = self.criterion(state_action_values, expected_state_action_values.unsqueeze(1))
+        # print(state_action_values, expected_state_action_values.unsqueeze(1))
+        # print(loss, "\n")
         # Optimize the model
         self.optimizer.zero_grad()
         loss.backward()

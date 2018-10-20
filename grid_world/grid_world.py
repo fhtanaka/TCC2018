@@ -63,7 +63,7 @@ class Grid_world():
             reward = +100
             done = True
         elif (self.grid[next_pos] == trap):
-            reward = -100
+            reward = -25
             done = False
         else:
             reward = -1
