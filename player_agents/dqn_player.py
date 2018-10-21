@@ -67,12 +67,10 @@ class dqn_player():
         if (self.explore_exploit() or optimal):
             with torch.no_grad():
                 net = self.policy_net(game.super_board) # Returns the expected value of each action
-                print(net.reshape((5,5)))
                 action=valid[net[0][valid].max(0)[1]] # Select the action with max values from the indexes in valid_actions
         else:
             action=random.choice(valid)
 
-        print(action)
         return torch.tensor([[action]], device=self.device, dtype=torch.long)
 
     def play_reward(self, action, state, next_state):

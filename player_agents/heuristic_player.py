@@ -2,7 +2,7 @@ import random
 from game_model import *
 
 class heuristic_player():
-    def __init__(self, color, strategy, chance=0.):
+    def __init__(self, color, strategy, chance=0.5):
         self.color = color
         self.chance = chance
         if (strategy == "random"):
