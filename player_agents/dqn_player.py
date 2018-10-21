@@ -22,7 +22,8 @@ class dqn_player():
         self.eps_decay = config.eps_decay
         self.gamma = config.gamma
         self.batch_size = config.batch_size
-        self.target_update = config.target_update
+        self.policy_net_update = config.policy_net_update
+        self.target_net_update = config.target_net_update
 
         # This part is for the network
         if (model != False):
@@ -34,7 +35,7 @@ class dqn_player():
         self.target_net = DQN(config).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
-        self.optimizer = optim.RMSprop(self.policy_net.parameters(), momentum=0.1, lr=0.001)
+        self.optimizer = optim.RMSprop(self.policy_net.parameters(), momentum=0.1)
         self.criterion = torch.nn.SmoothL1Loss()
         self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
@@ -66,9 +67,12 @@ class dqn_player():
         if (self.explore_exploit() or optimal):
             with torch.no_grad():
                 net = self.policy_net(game.super_board) # Returns the expected value of each action
+                print(net.reshape((5,5)))
                 action=valid[net[0][valid].max(0)[1]] # Select the action with max values from the indexes in valid_actions
         else:
             action=random.choice(valid)
+
+        print(action)
         return torch.tensor([[action]], device=self.device, dtype=torch.long)
 
     def play_reward(self, action, state, next_state):
@@ -101,7 +105,7 @@ class dqn_player():
     def optimize_target_net(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
-    def optimize_model(self):
+    def optimize_policy_net(self):
         if len(self.memory) < self.batch_size:
             return
         transitions = self.memory.sample(self.batch_size)
