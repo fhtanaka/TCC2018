@@ -20,6 +20,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         game.change_color_print()
         turn = 0
         while (game.winner() == None):
+            
             if (turn%2 == player_model.color):
                 state = torch.tensor(game.super_board)
                 action = cpu.select_valid_action(game)
