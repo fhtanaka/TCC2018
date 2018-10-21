@@ -34,21 +34,20 @@ class hex_game:
         self.input_shape = (6,self.input_size,self.input_size)
         self.to_play=white
         self.print_colored = True
-        if (len(board) != 0):
-            self.board=board
-            return
 
-        even = 1 - size%2
         self.super_board = torch.zeros((1, *self.input_shape), dtype=torch.float, device=self.device)
         self.board = self.super_board[0]
+        if (len(board) != 0):
+            self.board=torch.tensor(board)
+            return
         self.board[white, 0:padding, :] = 1
-        self.board[white, self.input_size-padding+even:, :] = 1
+        self.board[white, self.input_size-padding:, :] = 1
         self.board[west, 0:padding, :] = 1
-        self.board[east, self.input_size-padding+even:, :] = 1
+        self.board[east, self.input_size-padding:, :] = 1
         self.board[black, :, 0:padding] = 1
-        self.board[black, :, self.input_size-padding+even:] = 1
+        self.board[black, :, self.input_size-padding:] = 1
         self.board[north, :, 0:padding] = 1
-        self.board[south, :, self.input_size-padding+even:] = 1
+        self.board[south, :, self.input_size-padding:] = 1
 
 
     '''
@@ -58,21 +57,27 @@ class hex_game:
     3) Action: This is the action related to a specific play (Ex: 1 means (1,1), 2 means (1,2)...)
     '''
 
-    def notation_to_index(self, move):
-        x = ord(move[0].lower())-ord('a')+self.padding
-        y = int(move[1:])-1+self.padding
+    def index_to_notation(self, index):
+        return chr(ord('a')+index[1]-self.padding)+str(index[0]-self.padding+1)
+
+    def index_to_action(self, index):
+        return (index[0]-self.padding)*self.size+(index[1]-self.padding)
+
+    def notation_to_index(self, notation):
+        x = int(notation[1:])-1+self.padding
+        y = ord(notation[0].lower())-ord('a')+self.padding
         return (x,y)
 
-    def index_to_notation(self, cell):
-        return chr(ord('a')+cell[0]-self.padding)+str(cell[1]-self.padding+1)
+    def notation_to_action(self, notation):
+        return self.index_to_action(self.notation_to_index(notation))
 
     def action_to_index(self, action):
         i = int(action/self.size)+self.padding
         j = int(action%self.size)+self.padding
         return (i,j)
 
-    def index_to_action(self, index):
-        return (index[0]-self.padding)*self.size+(index[1]-self.padding)
+    def action_to_notation(self, action):
+        return self.index_to_notation(self.action_to_index(action))
 
     # Changes any type of notation to index
     def change_move_to_index(self, move):
@@ -225,16 +230,16 @@ class hex_game:
             else:
                 ret+=chr(ord('A')+(x-self.padding))+' '*offset*2
         ret+='\n'
-        for y in range(self.input_size):
-            if(y<self.padding or y>=self.size+self.padding):
+        for x in range(self.input_size):
+            if(x<self.padding or x>=self.size+self.padding):
                 ret+=' '*(offset*2+coord_size)
             else:
-                ret+=str(y+1-self.padding)+' '*(offset*2+coord_size-len(str(y+1-self.padding)))
-            for x in range(self.input_size):
+                ret+=str(x+1-self.padding)+' '*(offset*2+coord_size-len(str(x+1-self.padding)))
+            for y in range(self.input_size):
                 if(self.board[white, x, y] == 1):
                     if(self.board[west, x, y] == 1 and self.board[east, x, y]):
                         ret+=both_color
-                    elif(self.board[west, x,y]):
+                    elif(self.board[west, x, y]):
                         ret+=edge1_color
                     elif(self.board[east, x, y]):
                         ret+=edge2_color
@@ -246,7 +251,7 @@ class hex_game:
                 elif(self.board[black, x, y] == 1):
                     if(self.board[north, x, y] == 1 and self.board[south, x, y]):
                         ret+=both_color
-                    elif(self.board[north, x,y]):
+                    elif(self.board[north, x, y]):
                         ret+=edge1_color
                     elif(self.board[south, x, y]):
                         ret+=edge2_color
@@ -255,7 +260,7 @@ class hex_game:
                 else:
                     ret+=empty
                 ret+=' '*offset*2
-            ret+="\n"+' '*offset*(y+1)
+            ret+="\n"+' '*offset*(x+1)
         ret+=' '*(offset*2+1)+(' '*offset*2)*self.input_size
 
         return ret

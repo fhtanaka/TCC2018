@@ -34,10 +34,9 @@ class DQN(nn.Module):
                 layer_count+=1
         
         #full connected layer that connects the last conv layer to the Q-values
-        self.add_module("full_connected_layer", nn.Linear((flat_features_size**2)*config.conv_layers[-1], config.board_size**2))
-
-        for i in self.modules():
-            i.apply(init_weights)
+        out = (flat_features_size**2)*config.conv_layers[-1]
+        self.add_module("full_connected_layer", nn.Linear(out, config.board_size**2))
+        self._modules["full_connected_layer"].apply(init_weights)
 
     def forward(self, x):
         layers_names = list(self._modules)
