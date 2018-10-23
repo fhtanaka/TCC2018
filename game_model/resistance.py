@@ -102,7 +102,10 @@ def resistance(game, empty, color):
 	#slightly hacky fix for rare case of isolated empty cells
 	#happens rarely and fix should be fine but could improve
 	except np.linalg.linalg.LinAlgError:
-		V = np.linalg.lstsq(G,I, rcond=None)[0]
+		try:
+			V = np.linalg.lstsq(G,I, rcond=None)[0]
+		except:
+			V = np.linalg.lstsq(G,I)[0]
 
 	V_board = np.zeros((game.input_size, game.input_size))
 	for i in range(num_empty):
@@ -154,7 +157,7 @@ def score(game, color):
 		elif (C2_prime != 0):
 			Q[cell] = min(1,max(-1,C1_prime/C2_prime - 1))
 		else:
-			Q[cell] = 1
+			Q[cell] = 1.
 
 	output = -1*np.ones((game.size, game.size))
 	for cell, value in Q.items():
