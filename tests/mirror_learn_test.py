@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 from network import *
 from player_agents import *
 from game_model import *

@@ -36,18 +36,20 @@ class hex_game:
         self.print_colored = True
 
         self.super_board = torch.zeros((1, *self.input_shape), dtype=torch.float, device=self.device)
-        self.board = self.super_board[0]
+        self.torch_board = self.super_board[0]
         if (len(board) != 0):
-            self.board=torch.tensor(board)
+            self.torch_board=torch.tensor(board)
             return
-        self.board[white, 0:padding, :] = 1
-        self.board[white, self.input_size-padding:, :] = 1
-        self.board[west, 0:padding, :] = 1
-        self.board[east, self.input_size-padding:, :] = 1
-        self.board[black, :, 0:padding] = 1
-        self.board[black, :, self.input_size-padding:] = 1
-        self.board[north, :, 0:padding] = 1
-        self.board[south, :, self.input_size-padding:] = 1
+        self.torch_board[white, 0:padding, :] = 1
+        self.torch_board[white, self.input_size-padding:, :] = 1
+        self.torch_board[west, 0:padding, :] = 1
+        self.torch_board[east, self.input_size-padding:, :] = 1
+        self.torch_board[black, :, 0:padding] = 1
+        self.torch_board[black, :, self.input_size-padding:] = 1
+        self.torch_board[north, :, 0:padding] = 1
+        self.torch_board[south, :, self.input_size-padding:] = 1
+
+        self.np_board = self.torch_board.cpu().numpy()
 
         self.mask = torch.ones((self.input_size, self.input_size), dtype=torch.uint8, device=self.device)
         self.mask[0][0] = self.mask[self.input_size-1][self.input_size-1]  = 0
@@ -106,20 +108,21 @@ class hex_game:
             if (0<=n[0]+x and n[0]+x<self.input_size and 0<=n[1]+y and n[1]+y<self.input_size)]
 
     def mirror_board(self):
-        m_board = torch.zeros(self.input_shape, dtype=torch.float, device=self.device)
-        m_board[white] = torch.transpose(self.board[black], 0, 1)
-        m_board[black] = torch.transpose(self.board[white], 0, 1)
-        m_board[north] = torch.transpose(self.board[west], 0, 1)
-        m_board[east]  = torch.transpose(self.board[south], 0, 1)
-        m_board[south] = torch.transpose(self.board[east], 0, 1)
-        m_board[west]  = torch.transpose(self.board[north], 0, 1)
-        return m_board
+        m_board = np.zeros(self.np_board.shape)
+        m_board[white]=np.transpose(self.np_board[black])
+        m_board[black]=np.transpose(self.np_board[white])
+        m_board[north]=np.transpose(self.np_board[west])
+        m_board[east] =np.transpose(self.np_board[south])
+        m_board[south]=np.transpose(self.np_board[east])
+        m_board[west] =np.transpose(self.np_board[north])
+
+        return torch.from_numpy(m_board, dtype=torch.float, device=self.device)
 
 
     def winner(self):
-        if(self.board[east,0,0] and self.board[west,0,0]):
+        if(self.np_board[east,0,0] and self.np_board[west,0,0]):
             return white
-        elif(self.board[north,0,0] and self.board[south,0,0]):
+        elif(self.np_board[north,0,0] and self.np_board[south,0,0]):
             return black
         return None
 
@@ -134,20 +137,21 @@ class hex_game:
             return 0
 
     def flood_fill(self, cell, color, edge):
-        self.board[edge, cell[0], cell[1]] = 1
+        self.np_board[edge, cell[0], cell[1]] = 1
         for n in self.neighbors(cell):
-            if(self.board[color, n[0], n[1]] and not self.board[edge, n[0], n[1]]):
+            if(self.np_board[color, n[0], n[1]] and not self.np_board[edge, n[0], n[1]]):
                 self.flood_fill(n, color, edge)
 
     def play_cell(self, cell, color):
         edge1_connection = False
         edge2_connection = False
         cell = self.change_move_to_index(cell)
-        if self.board[other(color), cell[0], cell[1]] == 1 or self.board[color, cell[0], cell[1]] == 1:
+        if self.np_board[other(color), cell[0], cell[1]] == 1 or self.np_board[color, cell[0], cell[1]] == 1:
             raise ValueError("Cell occupied")
         
         #Fill the classe of the color
-        self.board[color, cell[0], cell[1]] = 1
+        self.torch_board[color, cell[0], cell[1]] = 1
+        self.np_board[color, cell[0], cell[1]] = 1
         
         # Fill the connected classes
         if(color == white):
@@ -157,9 +161,9 @@ class hex_game:
             edge1 = north
             edge2 = south
         for n in self.neighbors(cell):
-            if(self.board[edge1, n[0], n[1]] and self.board[color, n[0], n[1]]):
+            if(self.np_board[edge1, n[0], n[1]] and self.np_board[color, n[0], n[1]]):
                 edge1_connection = True
-            if(self.board[edge2, n[0], n[1]] and self.board[color, n[0], n[1]]):
+            if(self.np_board[edge2, n[0], n[1]] and self.np_board[color, n[0], n[1]]):
                 edge2_connection = True
         if(edge1_connection):
             self.flood_fill(cell, color, edge1)
@@ -176,17 +180,16 @@ class hex_game:
 
     # Returns the indexes that are possible to play (Where there is no piece)
     # def legal_indexes(self):
-    #     white_plays = (self.board[white]==0).nonzero().numpy()
-    #     black_plays = (self.board[black]==0).nonzero().numpy()
+    #     white_plays = (self.torch_board[white]==0).nonzero().numpy()
+    #     black_plays = (self.torch_board[black]==0).nonzero().numpy()
     #     possible_plays = np.array([x for x in set(tuple(x) for x in black_plays) & set(tuple(x) for x in white_plays)])
     #     return possible_plays
 
     def legal_indexes(self):
-        white_plays = self.board[white]==0
-        black_plays = self.board[black]==0
-        possible_plays = (white_plays == black_plays)
-        possible_plays = (possible_plays == self.mask).nonzero()
-        return possible_plays.cpu().numpy()
+        white_plays=np.argwhere(self.np_board[white]==False)
+        black_plays=np.argwhere(self.np_board[black]==False)
+        possible_plays = np.array([x for x in set(tuple(x) for x in black_plays) & set(tuple(x) for x in white_plays)])
+        return possible_plays
 
     def legal_actions(self):
         return list(map(self.index_to_action, self.legal_indexes()))
@@ -204,7 +207,7 @@ class hex_game:
             raise ValueError("No possible plays")
 
     def is_cell_empty(self, cell):
-        if (self.board[white, cell[0], cell[1]]==False and self.board[black, cell[0], cell[1]]==False):
+        if (self.np_board[white, cell[0], cell[1]]==False and self.np_board[black, cell[0], cell[1]]==False):
             return True
         else:
             return False
@@ -246,24 +249,24 @@ class hex_game:
             else:
                 ret+=str(x+1-self.padding)+' '*(offset*2+coord_size-len(str(x+1-self.padding)))
             for y in range(self.input_size):
-                if(self.board[white, x, y] == 1):
-                    if(self.board[west, x, y] == 1 and self.board[east, x, y]):
+                if(self.np_board[white, x, y] == 1):
+                    if(self.np_board[west, x, y] == 1 and self.np_board[east, x, y]):
                         ret+=both_color
-                    elif(self.board[west, x, y]):
+                    elif(self.np_board[west, x, y]):
                         ret+=edge1_color
-                    elif(self.board[east, x, y]):
+                    elif(self.np_board[east, x, y]):
                         ret+=edge2_color
-                    if(self.board[black, x, y] == 1):
+                    if(self.np_board[black, x, y] == 1):
                         ret+=invalid
                     else:
                         ret+=w
                     ret+=end_color
-                elif(self.board[black, x, y] == 1):
-                    if(self.board[north, x, y] == 1 and self.board[south, x, y]):
+                elif(self.np_board[black, x, y] == 1):
+                    if(self.np_board[north, x, y] == 1 and self.np_board[south, x, y]):
                         ret+=both_color
-                    elif(self.board[north, x, y]):
+                    elif(self.np_board[north, x, y]):
                         ret+=edge1_color
-                    elif(self.board[south, x, y]):
+                    elif(self.np_board[south, x, y]):
                         ret+=edge2_color
                     ret+=b
                     ret+=end_color

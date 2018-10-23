@@ -16,7 +16,7 @@ def get_empty(game):
 	indices = []
 	for x in range(game.input_size):
 		for y in range(game.input_size):
-			if(game.board[white,x,y] == 0 and game.board[black,x,y] == 0):
+			if(game.np_board[white,x,y] == 0 and game.np_board[black,x,y] == 0):
 				count+=1
 				indices.append((x,y))
 	return count, indices
@@ -27,9 +27,9 @@ def fill_connect(game, cell, color, checked):
 	connected = set()
 	for n in game.neighbors(cell):
 		if(not checked[n]):
-			if(game.board[color,n[0], n[1]]):
+			if(game.np_board[color,n[0], n[1]]):
 				connected = connected | fill_connect(game, n, color, checked)
-			elif(not game.board[other(color), n[0], n[1]]):
+			elif(not game.np_board[other(color), n[0], n[1]]):
 				connected.add(n)
 	return connected
 
@@ -39,13 +39,13 @@ def get_connections(game, color, empty, checked):
 	for cell in empty:
 		for n in game.neighbors(cell):
 			if(not checked[n]):
-				if(game.board[color, n[0], n[1]]):
+				if(game.np_board[color, n[0], n[1]]):
 					connected_set = fill_connect(game, n, color, checked)
 					for c1 in connected_set:
 						for c2 in connected_set:
 							connections[c1].add(c2)
 							connections[c2].add(c1)
-				elif(not game.board[other(color),n[0],n[1]]):
+				elif(not game.np_board[other(color),n[0],n[1]]):
 					connections[cell].add(n)
 	return connections
 
