@@ -49,6 +49,9 @@ class hex_game:
         self.board[north, :, 0:padding] = 1
         self.board[south, :, self.input_size-padding:] = 1
 
+        self.mask = torch.ones((self.input_size, self.input_size), dtype=torch.uint8, device=self.device)
+        self.mask[0][0] = self.mask[self.input_size-1][self.input_size-1]  = 0
+        self.mask[0][self.input_size-1] =self.mask[self.input_size-1][0]  = 0
 
     '''
     There are 3 types of notation in the program:
@@ -172,11 +175,18 @@ class hex_game:
             self.to_play=white
 
     # Returns the indexes that are possible to play (Where there is no piece)
+    # def legal_indexes(self):
+    #     white_plays = (self.board[white]==0).nonzero().numpy()
+    #     black_plays = (self.board[black]==0).nonzero().numpy()
+    #     possible_plays = np.array([x for x in set(tuple(x) for x in black_plays) & set(tuple(x) for x in white_plays)])
+    #     return possible_plays
+
     def legal_indexes(self):
-        white_plays = (self.board[white]==0).nonzero().numpy()
-        black_plays = (self.board[black]==0).nonzero().numpy()
-        possible_plays = np.array([x for x in set(tuple(x) for x in black_plays) & set(tuple(x) for x in white_plays)])
-        return possible_plays
+        white_plays = self.board[white]==0
+        black_plays = self.board[black]==0
+        possible_plays = (white_plays == black_plays)
+        possible_plays = (possible_plays == self.mask).nonzero()
+        return possible_plays.cpu().numpy()
 
     def legal_actions(self):
         return list(map(self.index_to_action, self.legal_indexes()))
