@@ -35,7 +35,7 @@ class dqn_player():
         self.target_net = DQN(config).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
-        self.optimizer = optim.RMSprop(self.policy_net.parameters(), momentum=0.1)
+        self.optimizer = optim.RMSprop(self.policy_net.parameters(), lr=config.lr, momentum=config.momentum)
         self.criterion = torch.nn.SmoothL1Loss()
         self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
@@ -137,6 +137,7 @@ class dqn_player():
 
         # Compute Huber loss
         loss = self.criterion(state_action_values, expected_state_action_values.unsqueeze(1))
+
 
         # Optimize the model
         self.optimizer.zero_grad()

@@ -25,6 +25,8 @@ class config ():
         self.kernel= [2] # Size of the kernel in the conv layers
         #pool = [1, 1] # Size of the pooling
         # nn_layers = [8] # Size of the neural netowrk layers
+        self.lr = 0.01
+        self.momentum = 0.1
         self.batch_size = 1
         self.replay_memory = 1
         self.policy_net_update = 1
@@ -36,6 +38,9 @@ class config ():
 
 color = white
 config = config(color)
+print(device)
+if (torch.cuda.is_available()):
+    torch.backends.cudnn.benchmark = True
 
 game = hex_game(config.board_size, config.padding, device)
 game.play("c1")
@@ -46,11 +51,10 @@ game.play("c4")
 game.play("d3")
 game.play("c5")
 game.play("e3")
-board = torch.tensor(game.board)
-
+board = torch.tensor(game.super_board)
 cpu = dqn_player(config, device)
 for i in range(16):
-    game = hex_game(config.board_size, config.padding, board=board)
+    game = hex_game(config.board_size, config.padding, device,board=board)
 
     state = torch.tensor(game.super_board)
     action = cpu.select_valid_action(game, optimal=True)

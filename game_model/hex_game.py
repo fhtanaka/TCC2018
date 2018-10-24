@@ -35,25 +35,22 @@ class hex_game:
         self.to_play=white
         self.print_colored = True
 
-        self.super_board = torch.zeros((1, *self.input_shape), dtype=torch.float, device=self.device)
-        self.torch_board = self.super_board[0]
         if (len(board) != 0):
-            self.torch_board=torch.tensor(board)
-            return
-        self.torch_board[white, 0:padding, :] = 1
-        self.torch_board[white, self.input_size-padding:, :] = 1
-        self.torch_board[west, 0:padding, :] = 1
-        self.torch_board[east, self.input_size-padding:, :] = 1
-        self.torch_board[black, :, 0:padding] = 1
-        self.torch_board[black, :, self.input_size-padding:] = 1
-        self.torch_board[north, :, 0:padding] = 1
-        self.torch_board[south, :, self.input_size-padding:] = 1
+            self.super_board = torch.tensor(board)
+            self.torch_board = self.super_board[0]
+        else:
+            self.super_board = torch.zeros((1, *self.input_shape), dtype=torch.float, device=self.device)
+            self.torch_board = self.super_board[0]
+            self.torch_board[white, 0:padding, :] = 1
+            self.torch_board[white, self.input_size-padding:, :] = 1
+            self.torch_board[west, 0:padding, :] = 1
+            self.torch_board[east, self.input_size-padding:, :] = 1
+            self.torch_board[black, :, 0:padding] = 1
+            self.torch_board[black, :, self.input_size-padding:] = 1
+            self.torch_board[north, :, 0:padding] = 1
+            self.torch_board[south, :, self.input_size-padding:] = 1
 
         self.np_board = self.torch_board.cpu().numpy()
-
-        self.mask = torch.ones((self.input_size, self.input_size), dtype=torch.uint8, device=self.device)
-        self.mask[0][0] = self.mask[self.input_size-1][self.input_size-1]  = 0
-        self.mask[0][self.input_size-1] =self.mask[self.input_size-1][0]  = 0
 
     '''
     There are 3 types of notation in the program:
@@ -107,16 +104,26 @@ class hex_game:
         return [(n[0]+x , n[1]+y) for n in neighbor_patterns\
             if (0<=n[0]+x and n[0]+x<self.input_size and 0<=n[1]+y and n[1]+y<self.input_size)]
 
-    def mirror_board(self):
-        m_board = np.zeros(self.np_board.shape)
-        m_board[white]=np.transpose(self.np_board[black])
-        m_board[black]=np.transpose(self.np_board[white])
-        m_board[north]=np.transpose(self.np_board[west])
-        m_board[east] =np.transpose(self.np_board[south])
-        m_board[south]=np.transpose(self.np_board[east])
-        m_board[west] =np.transpose(self.np_board[north])
+    # def mirror_board(self):
+    #     m_board = np.zeros(self.np_board.shape, dtype=float)
+    #     m_board[white]=np.transpose(self.np_board[black])
+    #     m_board[black]=np.transpose(self.np_board[white])
+    #     m_board[north]=np.transpose(self.np_board[west])
+    #     m_board[east] =np.transpose(self.np_board[south])
+    #     m_board[south]=np.transpose(self.np_board[east])
+    #     m_board[west] =np.transpose(self.np_board[north])
 
-        return torch.from_numpy(m_board, dtype=torch.float, device=self.device)
+    #     return torch.from_numpy(m_board).to(self.device)
+
+    def mirror_board(self):
+        m_board = torch.zeros((1, *self.input_shape), dtype=torch.float, device=self.device)
+        m_board[0][white] = torch.transpose(self.torch_board[black], 0, 1)
+        m_board[0][black] = torch.transpose(self.torch_board[white], 0, 1)
+        m_board[0][north] = torch.transpose(self.torch_board[west], 0, 1)
+        m_board[0][east]  = torch.transpose(self.torch_board[south], 0, 1)
+        m_board[0][south] = torch.transpose(self.torch_board[east], 0, 1)
+        m_board[0][west]  = torch.transpose(self.torch_board[north], 0, 1)
+        return m_board
 
 
     def winner(self):
@@ -138,6 +145,7 @@ class hex_game:
 
     def flood_fill(self, cell, color, edge):
         self.np_board[edge, cell[0], cell[1]] = 1
+        self.torch_board[edge, cell[0], cell[1]] = 1
         for n in self.neighbors(cell):
             if(self.np_board[color, n[0], n[1]] and not self.np_board[edge, n[0], n[1]]):
                 self.flood_fill(n, color, edge)

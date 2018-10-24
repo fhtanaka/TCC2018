@@ -8,7 +8,7 @@ black = 1
 # num_episodes, opponent_method, filename=False, boards_to_print=-1
 training_regime = [
     # (100000, "random", 'random.txt', 1000),
-    (10000, "mixed", "mixed.txt", 10)
+    (10000, "eletric", "eletric.txt", 10)
 ]
 
 
@@ -24,6 +24,9 @@ class config ():
         self.kernel= [2] # Size of the kernel in the conv layers
         #pool = [1, 1] # Size of the pooling
         # nn_layers = [8] # Size of the neural netowrk layers
+        self.lr = 0.01
+        self.momentum = 0.1
+
         self.batch_size = 50
         self.replay_memory = 100
         self.policy_net_update = 1

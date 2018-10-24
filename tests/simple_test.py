@@ -49,16 +49,19 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         if (i%cpu.target_net_update == 0):
             cpu.optimize_target_net()
 
-        if (i%boards_to_print ==1):
+        if (i%boards_to_print == 1):
+            print(game.super_board)
             games_string += "\nGame " + str(i) + ":\n"
             games_string += "Winner: " + str(game.winner())
             games_string += game.__str__() + "\n"
 
 
+    print("Number of wins: " + str(wins))
     print("Win percentage: " + str(wins/num_episodes))
     print("Max consecutives wins: " + str(max_momentum) + "\n")
     if (filename != False):
         file = open(filename, "w")
+        file.write("\nNumber of wins: " + str(wins))        
         file.write("\nWin percentage: " + str(wins/num_episodes))
         file.write("\nMax consecutives wins: " + str(max_momentum))
         file.write("\n\n")
