@@ -31,11 +31,6 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
 
 
             else:
-
-                if (game.winner() == None and turn != 0):
-                    cpu.play_reward(action, state, next_state)
-
-
                 op_state = torch.tensor(game.mirror_board())
                 op_action = torch.tensor([[opponent.play(game)]], device=device, dtype=torch.long)
                 op_next_state = torch.tensor(game.mirror_board())
@@ -45,9 +40,10 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             turn += 1
         
         if (game.winner() == player_model.color):
+            # print("Ganhou!!! (", wins+1, ")")
+            cpu.win_reward(action, state, next_state)
             cpu.win_reward(action, state, next_state)
             cpu.lose_reward_turn_influenced(op_action, op_state, op_next_state, turn)
-            cpu.win_reward(action, state, next_state)
             cpu.lose_reward_turn_influenced(op_action, op_state, op_next_state, turn)
             wins+=1
             momentum +=1
@@ -55,8 +51,8 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
                 max_momentum = momentum
         else:
             cpu.lose_reward_turn_influenced(action, state, next_state, turn)
-            cpu.win_reward(op_action, op_state, op_next_state)
             cpu.lose_reward_turn_influenced(action, state, next_state, turn)
+            cpu.win_reward(op_action, op_state, op_next_state)
             cpu.win_reward(op_action, op_state, op_next_state)
             momentum = 0
         plot.append(wins)
@@ -67,7 +63,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         if (i%cpu.target_net_update == 0):
             cpu.optimize_target_net()
 
-        if (i%boards_to_print ==1):
+        if (boards_to_print != -1 and i%boards_to_print == 0):
             games_string += "\nGame " + str(i) + ":\n"
             games_string += "Winner: " + str(game.winner())
             games_string += game.__str__() + "\n"
