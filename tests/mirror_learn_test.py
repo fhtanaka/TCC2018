@@ -5,6 +5,7 @@ from player_agents import *
 from game_model import *
 from config import *
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 def training(player_model, num_episodes, opponent_method, filename=False, boards_to_print=-1):
     opponent = heuristic_player(cpu.opponent, opponent_method)
@@ -40,27 +41,29 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             turn += 1
         
         if (game.winner() == player_model.color):
-            # print("Ganhou!!! (", wins+1, ")")
+            print("Ganhou!!! (", wins+1, ")")
+            cpu.wins += 1
             cpu.win_reward(action, state, next_state)
             cpu.win_reward(action, state, next_state)
-            cpu.lose_reward_turn_influenced(op_action, op_state, op_next_state, turn)
-            cpu.lose_reward_turn_influenced(op_action, op_state, op_next_state, turn)
+            cpu.lose_reward_turn_influenced(op_action, op_state, game.zero_board(), turn)
+            cpu.lose_reward_turn_influenced(op_action, op_state, game.zero_board(), turn)
             wins+=1
             momentum +=1
             if (momentum > max_momentum):
                 max_momentum = momentum
         else:
-            cpu.lose_reward_turn_influenced(action, state, next_state, turn)
-            cpu.lose_reward_turn_influenced(action, state, next_state, turn)
-            cpu.win_reward(op_action, op_state, op_next_state)
-            cpu.win_reward(op_action, op_state, op_next_state)
+            cpu.lose_reward_turn_influenced(action, state, game.zero_board(), turn)
+            cpu.lose_reward_turn_influenced(action, state, game.zero_board(), turn)
+            cpu.win_reward(op_action, op_state, game.zero_board())
+            cpu.win_reward(op_action, op_state, game.zero_board())
             momentum = 0
-        plot.append(wins)
 
-        if (i%cpu.policy_net_update == 0):
-            cpu.optimize_policy_net()
+        if (i%cpu.policy_net_update == 0 and i > 0):
+            loss = cpu.optimize_policy_net()
+            if (loss is not None):
+                plot.append(loss.item())
 
-        if (i%cpu.target_net_update == 0):
+        if (i%cpu.target_net_update == 0 and i > 0):
             cpu.optimize_target_net()
 
         if (boards_to_print != -1 and i%boards_to_print == 0):
@@ -68,6 +71,8 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             games_string += "Winner: " + str(game.winner())
             games_string += game.__str__() + "\n"
 
+    plt.plot(plot)
+    plt.show()
 
     print("Number of wins: " + str(wins))
     print("Win percentage: " + str(wins/num_episodes))
@@ -79,13 +84,13 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         file.write("\nMax consecutives wins: " + str(max_momentum))
         file.write("\n\n")
         file.write(games_string)
-        # file.write(str(plot))
+        file.write(str(plot))
         file.write("\n\n")
         file.close 
 
 
 color = white
-save = True
+save = False
 
 print(device, "\n")
 if (torch.cuda.is_available()):

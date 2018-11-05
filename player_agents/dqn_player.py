@@ -25,6 +25,11 @@ class dqn_player():
         self.policy_net_update = config.policy_net_update
         self.target_net_update = config.target_net_update
 
+        self.policy_loss = 0
+        self.target_loss = float("inf")
+        self.wins = 0
+        self.old_wins = 1
+
         # This part is for the network
         if (model != False):
             self.policy_net = torch.load(model)
@@ -35,6 +40,7 @@ class dqn_player():
         self.target_net = DQN(config).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
+        # self.optimizer = optim.SGD(self.policy_net.parameters(), lr=config.lr, momentum=config.momentum)
         self.optimizer = optim.RMSprop(self.policy_net.parameters(), lr=config.lr, momentum=config.momentum)
         self.criterion = torch.nn.SmoothL1Loss()
         self.memory = ReplayMemory(config.replay_memory)
@@ -62,11 +68,13 @@ class dqn_player():
             return torch.tensor([[random.randrange(self.board_size**2)]], device=self.device, dtype=torch.long)
 
     # Selects a legal action
-    def select_valid_action(self, game, optimal=False):
+    def select_valid_action(self, game, optimal=False, print_values=False):
         valid = game.legal_actions() #Converts the indexes (x,y) in actions z
         if (self.explore_exploit() or optimal):
             with torch.no_grad():
                 net = self.policy_net(game.super_board) # Returns the expected value of each action
+                if (print_values):
+                    print(net.reshape((self.board_size, self.board_size)))
                 action=valid[net[0][valid].max(0)[1]] # Select the action with max values from the indexes in valid_actions
         else:
             action=random.choice(valid)
@@ -101,43 +109,45 @@ class dqn_player():
         # self.optimize_model()
 
     def optimize_target_net(self):
-        self.target_net.load_state_dict(self.policy_net.state_dict())
+        # self.target_net.load_state_dict(self.policy_net.state_dict())
+        if (self.policy_loss < self.target_loss or self.wins >= self.old_wins):
+            self.target_net.load_state_dict(self.policy_net.state_dict())
+            self.target_loss = self.policy_loss
+            self.policy_loss = 0
+            if (self.wins >= self.old_wins): 
+                self.old_wins = self.wins
+                self.wins = 0
+        else:
+            self.policy_net.load_state_dict(self.target_net.state_dict())
+            self.policy_loss = 0
 
     def optimize_policy_net(self):
         if len(self.memory) < self.batch_size:
-            return
+            return None
         transitions = self.memory.sample(self.batch_size)
 
         # Transpose the batch (see http://stackoverflow.com/a/19343/3343043 for
         # detailed explanation).
         batch = Transition(*zip(*transitions))
 
-        # Compute a mask of non-final states and concatenate the batch elements
-        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=self.device, dtype=torch.uint8)
-        non_final_next_states  = [s for s in batch.next_state if s is not None]
-        if non_final_next_states  == []:
-            return
-        else:
-            non_final_next_states = torch.cat(non_final_next_states )
-
         state_batch = torch.cat(batch.state)
         action_batch = torch.cat(batch.action)
         reward_batch = torch.cat(batch.reward)
-
+        next_state_batch = torch.cat(batch.next_state)
+        
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken
         state_action_values = self.policy_net(state_batch).gather(1, action_batch)
 
         # Compute V(s_{t+1}) for all next states.
         next_state_values = torch.zeros(self.batch_size, device=self.device)
-        next_state_values[non_final_mask] = self.target_net(non_final_next_states).max(1)[0].detach()
-        
+        next_state_values = self.target_net(next_state_batch).max(1)[0].detach()
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch.float()
 
         # Compute Huber loss
         loss = self.criterion(state_action_values, expected_state_action_values.unsqueeze(1))
-
+        self.policy_loss += loss
 
         # Optimize the model
         self.optimizer.zero_grad()
@@ -145,4 +155,6 @@ class dqn_player():
         for param in self.policy_net.parameters():
             param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
+
+        return loss
 

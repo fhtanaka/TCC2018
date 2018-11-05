@@ -223,6 +223,9 @@ class hex_game:
     def change_color_print(self):
         self.print_colored = not self.print_colored
 
+    def zero_board(self):
+        return torch.zeros(self.super_board.size(), device=self.device, dtype=torch.float)
+
     def __str__(self):
         """
         Print an ascii representation of the input.
