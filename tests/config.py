@@ -8,7 +8,7 @@ black = 1
 # num_episodes, opponent_method, filename=False, boards_to_print=-1
 training_regime = [
     # (100000, "random", 'random.txt', 1000),
-    (1000000, "eletric", "eletric.txt", 1)
+    (10000, "eletric", "eletric.txt", 1)
 ]
 
 
@@ -20,8 +20,8 @@ class config ():
         self.padding = 1 # size of padding for neurohex_client
         # netowrk config
         self.channels = 6
-        self.conv_layers = [24, 96] # Size of convolutional layers
-        self.kernel= [2, 2] # Size of the kernel in the conv layers
+        self.conv_layers = [48] # Size of convolutional layers
+        self.kernel= [2] # Size of the kernel in the conv layers
         # pool = [1, 1] # Size of the pooling
         # nn_layers = [8] # Size of the neural netowrk layers
         self.lr = 0.01

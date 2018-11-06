@@ -21,15 +21,15 @@ class config ():
         self.padding = 1 # size of padding for neurohex_client
         # netowrk config
         self.channels = 6
-        self.conv_layers = [] # Size of convolutional layers
-        self.kernel= [] # Size of the kernel in the conv layers
+        self.conv_layers = [48] # Size of convolutional layers
+        self.kernel= [2] # Size of the kernel in the conv layers
         #pool = [1, 1] # Size of the pooling
         # nn_layers = [8] # Size of the neural netowrk layers
         self.lr = 0.01
         self.momentum = 0.1
 
-        self.batch_size = 2
-        self.replay_memory = 2
+        self.batch_size = 1
+        self.replay_memory = 1
         self.policy_net_update = 1
         self.target_net_update = 20
         self.gamma = 0.999
@@ -84,7 +84,8 @@ game.play("e4")
 game.play("a1")
 scenario4 = (torch.tensor(game.super_board), "e1")
 
-scenarios = [scenario1, scenario2, scenario3, scenario4]
+# scenarios = [scenario1, scenario2, scenario3, scenario4]
+scenarios = [scenario1, scenario4]
 color = white
 print(device, "\n")
 if (torch.cuda.is_available()):
@@ -92,30 +93,33 @@ if (torch.cuda.is_available()):
 cpu = dqn_player(config(white), device)
 
 if __name__ == "__main__":
-    for i in range (1000):
+    for i in range (100):
         # print("!" * 80, "\n")
         scene = random.choice(scenarios)
         game = hex_game(5,1, device=device, board = scene[0])
 
         state = torch.tensor(game.super_board)
-        action = cpu.select_valid_action(game, optimal=True, print_values=False)
+        action = cpu.select_valid_action(game, optimal=True, print_values=True)
         game.play(game.action_to_index(action))
         next_state = torch.tensor(game.super_board)
 
         if (game.winner() != None):
             cpu.win_reward(action, state, game.zero_board())
+            cpu.optimize_policy_net()
         else:
             op_state = torch.tensor(game.mirror_board())
             op_action = torch.tensor([[game.notation_to_action(scene[1])]], device=device, dtype=torch.long)
             game.play(scene[1])
             op_next_state = torch.tensor(game.mirror_board())
             cpu.lose_reward(action, state, game.zero_board())
+            cpu.optimize_policy_net()
             cpu.win_reward(op_action, op_state, game.zero_board())
+            cpu.optimize_policy_net()
 
-        if (i%cpu.policy_net_update == 0):
-            print("loss: ", cpu.optimize_policy_net())
+        # if (i%cpu.policy_net_update == 0):
+        #     print("loss: ", cpu.optimize_policy_net())
 
-        if (i%cpu.target_net_update == 0):
-            cpu.optimize_target_net()
+        # if (i%cpu.target_net_update == 0):
+        #     cpu.optimize_target_net()
 
         print(game)

@@ -46,6 +46,8 @@ class dqn_player():
         self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
 
+        self.reward = 1000
+
     '''
     Sometimes use our model for choosing the action, and sometimes we’ll just sample one uniformly. 
     The probability of choosing a random action will start at eps_start and will decay exponentially towards eps_end. 
@@ -87,23 +89,23 @@ class dqn_player():
         # self.optimize_model()
 
     def win_reward(self, action, state, next_state):
-        reward = torch.tensor((+100,), device=self.device, dtype=torch.long)
+        reward = torch.tensor((self.reward,), device=self.device, dtype=torch.long)
         self.memory.push(state, action, next_state, reward)
         # self.optimize_model()
 
     def win_reward_turn_influenced(self, action, state, next_state, turn):
-        r = +100 - turn*50/(self.board_size**2)
+        r = self.reward - turn*(self.reward/2)/(self.board_size**2)
         reward = torch.tensor((r,), device=self.device, dtype=torch.long)
         self.memory.push(state, action, next_state, reward)
         # self.optimize_model()
 
     def lose_reward(self, action, state, next_state):
-        reward = torch.tensor((-100,), device=self.device, dtype=torch.long)
+        reward = torch.tensor((self.reward*-1,), device=self.device, dtype=torch.long)
         self.memory.push(state, action, next_state, reward)
         # self.optimize_model()
 
     def lose_reward_turn_influenced(self, action, state, next_state, turn):
-        r = -100 + turn*50/(self.board_size**2)
+        r = self.reward*-1 + turn*(self.reward/2)/(self.board_size**2)
         reward = torch.tensor((r,), device=self.device, dtype=torch.long)
         self.memory.push(state, action, next_state, reward)
         # self.optimize_model()

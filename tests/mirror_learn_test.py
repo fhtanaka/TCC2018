@@ -43,8 +43,8 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         if (game.winner() == player_model.color):
             print("Ganhou!!! (", wins+1, ")")
             cpu.wins += 1
-            cpu.win_reward(action, state, next_state)
-            cpu.win_reward(action, state, next_state)
+            cpu.win_reward(action, state, game.zero_board())
+            cpu.win_reward(action, state, game.zero_board())
             cpu.lose_reward_turn_influenced(op_action, op_state, game.zero_board(), turn)
             cpu.lose_reward_turn_influenced(op_action, op_state, game.zero_board(), turn)
             wins+=1
