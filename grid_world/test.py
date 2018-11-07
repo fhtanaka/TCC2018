@@ -1,10 +1,10 @@
 from grid_world import *
 from agent import *
 from config import *
-# torch.manual_seed(1)
-# np.random.seed(1)
+seed = 6
+torch.manual_seed(seed)
+np.random.seed(seed)
 config = config()
-num_episodes = 10000
 
 if (torch.cuda.is_available()):
     torch.backends.cudnn.benchmark = True
@@ -12,7 +12,7 @@ if (torch.cuda.is_available()):
 cpu = grid_agent(config, device)
 print("Beginning training of ", num_episodes, " episodes")
 step = 0
-max_turns = (100)
+max_turns = (15)
 grid = Grid_world(size = config.board_size, special=config.special, device=device)
 print(grid.grid)
 for i in range(num_episodes):
@@ -30,16 +30,16 @@ for i in range(num_episodes):
         acc_reward += reward
 
         if (done):
-            next_state = None
+            next_state = grid.zero_grid()
         else:
             next_state = grid.preprocess()
 
         actions.append ((state, action, next_state, reward))
 
-        if (step%config.optimize == 0):
-            cpu.optimize()
-        if (step%config.update_target_net == 0):
-            cpu.update_target_net()
+        # if (step%config.optimize == 0):
+        #     cpu.optimize()
+        # if (step%config.update_target_net == 0):
+        #     cpu.update_target_net()
 
         turns +=1
         step += 1
@@ -49,8 +49,16 @@ for i in range(num_episodes):
         for unit in actions:
             state, action, next_state, reward = unit
             cpu.add_action(state, action, next_state, reward)
+        cpu.optimize()
+        cpu.update_target_net()
+
         # for param in cpu.policy_net._modules["full_connected_layer1"].parameters():
         #     print(param)
         
     file.close
     print("(",i,")\t\t reward: ", acc_reward , "\t\t steps: ", turns)
+
+grid.reset()
+file = open("q_values.txt", "w")
+cpu.print_Q_values(cpu, grid, file = file)
+file.close

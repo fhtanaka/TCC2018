@@ -1,8 +1,11 @@
 from DQN import *
 from memory import *
+import numpy as np
 import torch.optim as optim
 import math
 
+action_dict = {"up": 0, "right": 1, "down": 2, "left": 3}
+actions=["up", "right", "down", "left"]
 
 class grid_agent:
 
@@ -29,7 +32,7 @@ class grid_agent:
         self.target_net = DQN(config).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
-        self.optimizer = optim.RMSprop(self.policy_net.parameters(), momentum=0.1, lr=0.001)
+        self.optimizer = optim.RMSprop(self.policy_net.parameters(), momentum=config.momentum, lr=config.lr)
         self.criterion = torch.nn.SmoothL1Loss()
         self.memory = ReplayMemory(config.replay_memory)
         self.steps_done = 0
@@ -47,8 +50,8 @@ class grid_agent:
         
         if (file):
             file.write(str(state) + "\n")
-            file.write("Valid actions: " + str(valid) + "\n")
-            file.write("Action values: " + str(net[0]) + "\n")
+            for i in valid:
+                file.write(str(actions[i]) + ": " + str(round(float(net[0][i].data), 4)) + "\n")
         
         if (self.explore_exploit() or optimal == True):
             with torch.no_grad():
@@ -60,7 +63,7 @@ class grid_agent:
             action=random.choice(valid)
         
         if (file):
-            file.write("Chosen action: " +  str(action) + "\n\n")
+            file.write("Action: " +  str(action) + "\n\n")
         return torch.tensor([[action]], device=self.device, dtype=torch.long)
 
     def add_action(self, state, action, next_state, reward):
@@ -98,9 +101,15 @@ class grid_agent:
         
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch.float()
-        
         # Compute Huber loss
+        # print(reward_batch.float())
+        # print(next_state_values )
+        # print(expected_state_action_values)
+        # print(batch.next_state)
         loss = self.criterion(state_action_values, expected_state_action_values.unsqueeze(1))
+        # print("!"*50)
+        # print(reward_batch.data[0])
+        # print(loss.data[0])
 
         # Optimize the model
         self.optimizer.zero_grad()
@@ -111,3 +120,16 @@ class grid_agent:
 
     def update_target_net(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())
+
+    def print_Q_values(self, cpu, board, file=False):
+        grid = board.grid
+        grid[grid==100] = 0
+
+        for i, j in np.transpose(np.where(grid == 0)):
+            grid[i][j] = 100
+            board.pos = (i, j)
+            cpu.select_valid_action(board.preprocess(), board.possible_actions(), file=file)
+
+            grid[i][j] = 0
+
+        board.reset()

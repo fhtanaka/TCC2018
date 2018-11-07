@@ -60,10 +60,10 @@ class Grid_world():
                       self.pos[1] + self.action_coords[action][1])
 
         if (self.grid[next_pos] == goal):
-            reward = +100
+            reward = +1000
             done = True
         elif (self.grid[next_pos] == trap):
-            reward = -25
+            reward = -500
             done = False
         else:
             reward = -1
@@ -82,4 +82,10 @@ class Grid_world():
         new_board[0] = tensor
         return new_board
 
+    def update_pos(self, i, j):
+        self.grid[self.pos] = 0
+        self.pos = (i,j)
+        self.grid[self.pos] = 100
 
+    def zero_grid(self):
+        return torch.zeros((1, 1, self.size, self.size), device=self.device)
