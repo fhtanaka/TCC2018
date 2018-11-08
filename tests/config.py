@@ -8,7 +8,7 @@ black = 1
 # num_episodes, opponent_method, filename=False, boards_to_print=-1
 training_regime = [
     # (100000, "random", 'random.txt', 1000),
-    (1000, "random", "random.txt", 100)
+    (150000, "eletric", "eletri.txt", 100)
 ]
 
 
@@ -50,3 +50,5 @@ class config ():
         self.eps_end = eps_end
         self.eps_start = 0.9
         self.eps_decay = 200
+
+        
