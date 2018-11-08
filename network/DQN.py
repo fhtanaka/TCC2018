@@ -11,7 +11,7 @@ def num_flat_features(x):
 
 def init_weights(m):
     if type(m) == nn.Linear:
-        m.weight.data.fill_(1.0)
+        m.weight.data.fill_(.0)
 
 class DQN(nn.Module):
     def __init__(self, config):
