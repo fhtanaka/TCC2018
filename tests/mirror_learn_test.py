@@ -41,7 +41,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             turn += 1
         
         if (game.winner() == player_model.color):
-            print("Ganhou!!! (", wins+1, ")")
+            # print("Ganhou!!! (", wins+1, ")")
             cpu.wins += 1
             cpu.win_reward(action, state, game.zero_board())
             cpu.win_reward(action, state, game.zero_board())
@@ -71,8 +71,8 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             games_string += "Winner: " + str(game.winner())
             games_string += game.__str__() + "\n"
 
-    plt.plot(plot)
-    plt.show()
+    # plt.plot(plot)
+    # plt.show()
 
     print("Number of wins: " + str(wins))
     print("Win percentage: " + str(wins/num_episodes))
@@ -84,7 +84,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         file.write("\nMax consecutives wins: " + str(max_momentum))
         file.write("\n\n")
         file.write(games_string)
-        file.write(str(plot))
+        # file.write(str(plot))
         file.write("\n\n")
         file.close 
 
