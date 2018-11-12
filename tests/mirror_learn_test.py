@@ -26,7 +26,6 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
                 state = torch.tensor(game.super_board)
                 action = cpu.select_valid_action(game)
                 game.play(game.action_to_index(action))
-                next_state = torch.tensor(game.super_board)
                 if (game.winner() == None and turn != 0):
                     cpu.play_reward(op_action, op_state, torch.tensor(game.mirror_board()))
 
@@ -34,7 +33,6 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             else:
                 op_state = torch.tensor(game.mirror_board())
                 op_action = torch.tensor([[opponent.play(game)]], device=device, dtype=torch.long)
-                op_next_state = torch.tensor(game.mirror_board())
 
                 if (game.winner() == None and turn != 0):
                     cpu.play_reward(action, state, torch.tensor(game.super_board))

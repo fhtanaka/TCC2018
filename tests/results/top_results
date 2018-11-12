@@ -1,0 +1,135 @@
+
+==> 12_lr-0.01_gm-0.8_end-0.1_layer-2 <==
+lr-0.01
+gamma-0.8
+end-0.1
+layers-([48, 384], [2, 2])
+
+
+Number of wins: 104520
+Win percentage: 0.6968
+Max consecutives wins: 47
+
+==> 9_lr-0.01_gm-0.9_end-0.1_layer-1 <==
+lr-0.01
+gamma-0.9
+end-0.1
+layers-([48], [2])
+
+
+Number of wins: 39998
+Win percentage: 0.26665333333333335
+Max consecutives wins: 17
+
+==> 0_lr-0.1_gm-0.9_end-0.1_layer-1 <==
+lr-0.1
+gamma-0.9
+end-0.1
+layers-([48], [2])
+
+
+Number of wins: 21187
+Win percentage: 0.14124666666666666
+Max consecutives wins: 12
+
+==> 3_lr-0.1_gm-0.8_end-0.1_layer-1 <==
+lr-0.1
+gamma-0.8
+end-0.1
+layers-([48], [2])
+
+
+Number of wins: 13749
+Win percentage: 0.09166
+Max consecutives wins: 11
+
+==> 4_lr-0.1_gm-0.8_end-0.25_layer-1 <==
+lr-0.1
+gamma-0.8
+end-0.25
+layers-([48], [2])
+
+
+Number of wins: 13692
+Win percentage: 0.09128
+Max consecutives wins: 7
+
+==> 14_lr-0.01_gm-0.8_end-0.4_layer-2 <==
+lr-0.01
+gamma-0.8
+end-0.4
+layers-([48, 384], [2, 2])
+
+
+Number of wins: 13690
+Win percentage: 0.09126666666666666
+Max consecutives wins: 7
+
+==> 1_lr-0.1_gm-0.9_end-0.25_layer-1 <==
+lr-0.1
+gamma-0.9
+end-0.25
+layers-([48], [2])
+
+
+Number of wins: 13653
+Win percentage: 0.09102
+Max consecutives wins: 6
+
+==> 10_lr-0.01_gm-0.9_end-0.25_layer-1 <==
+lr-0.01
+gamma-0.9
+end-0.25
+layers-([48], [2])
+
+
+Number of wins: 10739
+Win percentage: 0.07159333333333333
+Max consecutives wins: 5
+
+==> 13_lr-0.01_gm-0.8_end-0.25_layer-1 <==
+lr-0.01
+gamma-0.8
+end-0.25
+layers-([48], [2])
+
+
+Number of wins: 7233
+Win percentage: 0.04822
+Max consecutives wins: 5
+
+==> 4_lr-0.1_gm-0.8_end-0.25_layer-2 <==
+lr-0.1
+gamma-0.8
+end-0.25
+layers-([48, 384], [2, 2])
+
+
+Number of wins: 6685
+Win percentage: 0.044566666666666664
+Max consecutives wins: 7
+
+==> 12_lr-0.01_gm-0.8_end-0.1_layer-1 <==
+lr-0.01
+gamma-0.8
+end-0.1
+layers-([48], [2])
+
+
+Number of wins: 6440
+Win percentage: 0.04293333333333333
+Max consecutives wins: 9
+
+==> 5_lr-0.1_gm-0.8_end-0.4_layer-1 <==
+lr-0.1
+gamma-0.8
+end-0.4
+layers-([48], [2])
+
+
+Number of wins: 4962
+Win percentage: 0.03308
+Max consecutives wins: 4
+
+
+

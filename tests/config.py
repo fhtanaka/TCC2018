@@ -7,8 +7,8 @@ black = 1
 
 # num_episodes, opponent_method, filename=False, boards_to_print=-1
 training_regime = [
-    # (100000, "random", 'random.txt', 1000),
-    (150000, "eletric", "eletri.txt", 100)
+    # (150000, "eletric", "workingR.txt", 100),
+    (150000, "eletric", "eletric_simple2.txt", 100)
 ]
 
 
@@ -26,8 +26,8 @@ class config ():
                 replay_memory = 300,
                 policy_net_update = 5,
                 target_net_update = 40,
-                gamma = 0.9,
-                eps_end = 0.3
+                gamma = 0.8,
+                eps_end = 0.1
                 ):
 
         self.color = color

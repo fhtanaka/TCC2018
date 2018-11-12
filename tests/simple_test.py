@@ -17,7 +17,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
     print("Beginning", opponent_method, " training of ", num_episodes, " episodes")
     for i in tqdm(range(num_episodes), desc=opponent_method+" training (" + str(num_episodes)+ ")"):
         game = hex_game(player_model.board_size, player_model.padding, device)
-        # game.change_color_print()
+        game.change_color_print()
         turn = 0
         while (game.winner() == None):
             
@@ -25,21 +25,20 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
                 state = torch.tensor(game.super_board)
                 action = cpu.select_valid_action(game)
                 game.play(game.action_to_index(action))
-                next_state = torch.tensor(game.super_board)
             else:
                 opponent.play(game)
                 if (game.winner() == None and turn != 0):
-                    cpu.play_reward(action, state, next_state)
+                    cpu.play_reward(action, state, torch.tensor(game.super_board))
             turn += 1
         
         if (game.winner() == player_model.color):
-            cpu.win_reward(action, state, next_state)
+            cpu.win_reward(action, state, game.zero_board())
             wins+=1
             momentum +=1
             if (momentum > max_momentum):
                 max_momentum = momentum
         else:
-            cpu.lose_reward_turn_influenced(action, state, next_state, turn)
+            cpu.lose_reward_turn_influenced(action, state, game.zero_board(), turn)
             momentum = 0
         plot.append(wins)
 
@@ -50,7 +49,6 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             cpu.optimize_target_net()
 
         if (i%boards_to_print == 1):
-            print(game.super_board)
             games_string += "\nGame " + str(i) + ":\n"
             games_string += "Winner: " + str(game.winner())
             games_string += game.__str__() + "\n"

@@ -92,7 +92,7 @@ if (torch.cuda.is_available()):
 learning_rates = [0.1, 0.01]
 gamma = [0.9, 0.8, 0.99]
 eps_end = [0.1, 0.25, 0.4]
-layers = [([48], [2]), ([48, 384], [2, 2])]
+layers = [([48, 384], [2, 2])]
 
 training_episodes=150000
 b_print = 100
@@ -113,7 +113,7 @@ for lr in learning_rates:
                 opp = heuristic_player(cpu.opponent, "mixed", chance=0.9)
 
                 filename="results/"+str(training_number) + "_lr-" + str(lr)+ "_gm-" + str(gm) + "_end-" + str(end) + "_layer-" + str(len(layer[0]))
-                print(filename)
+                print("\n"+filename)
                 file = open(filename, "w")
 
                 file.write("lr-" + str(lr) + "\n")
