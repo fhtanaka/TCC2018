@@ -8,7 +8,7 @@ black = 1
 # num_episodes, opponent_method, filename=False, boards_to_print=-1
 training_regime = [
     # (150000, "eletric", "workingR.txt", 100),
-    (150000, "eletric", "eletric_simple2.txt", 100)
+    (150000, "mixed", "mixed_mirror_2_layers_7_board.txt", 100)
 ]
 
 
@@ -16,10 +16,10 @@ class config ():
     # game config
     def __init__(self, 
                 color=white,
-                board_size=5,
+                board_size=7,
                 padding=1,
-                conv_layers = [48],
-                kernel = [2],
+                conv_layers = [48, 384],
+                kernel = [2, 2],
                 lr=0.01,
                 momentum=0.1,
                 batch_size = 200,

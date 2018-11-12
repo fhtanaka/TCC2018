@@ -13,6 +13,12 @@ def init_weights(m):
     if type(m) == nn.Linear:
         m.weight.data.fill_(.0)
 
+def flatten_relu(x):
+    return x.view(-1, num_flat_features(F.relu(x)))
+
+def flatten_no_relu(x):
+    return x.view(-1, num_flat_features(x))
+
 class DQN(nn.Module):
     def __init__(self, config):
 
@@ -31,10 +37,10 @@ class DQN(nn.Module):
         
         if (len(conv_layers) > 1):
             out = (flat_features_size**2)*config.conv_layers[-1]
-            self.flatten = lambda x: x.view(-1, num_flat_features(x))
+            self.flatten = flatten_no_relu
         else:
             out = (flat_features_size**2)*config.channels
-            self.flatten = lambda x: x.view(-1, num_flat_features(F.relu(x)))
+            self.flatten = flatten_relu
 
         #full connected layer that connects the last conv layer to the Q-values
         self.add_module("full_connected_layer", nn.Linear(out, config.board_size**2))

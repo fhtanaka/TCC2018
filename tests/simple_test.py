@@ -7,7 +7,7 @@ from config import *
 from tqdm import tqdm
 
 def training(player_model, num_episodes, opponent_method, filename=False, boards_to_print=-1):
-    opponent = heuristic_player(cpu.opponent, opponent_method)
+    opponent = heuristic_player(cpu.opponent, opponent_method, chance=0.8)
     wins = 0
     momentum = 0
     max_momentum = 0
@@ -70,7 +70,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
 
 
 color = white
-save = False
+save = True
 
 print(device, "\n")
 if (torch.cuda.is_available()):

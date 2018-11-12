@@ -89,12 +89,12 @@ if (torch.cuda.is_available()):
     torch.backends.cudnn.benchmark = True
 
 
-learning_rates = [0.1, 0.01]
-gamma = [0.9, 0.8, 0.99]
-eps_end = [0.1, 0.25, 0.4]
-layers = [([48, 384], [2, 2])]
+learning_rates = [0.01]
+gamma = [0.8]
+eps_end = [0.1]
+layers = [([48, 192, 768], [2, 2, 2]), ([48, 192], [2, 2]), ([96], [2])]
 
-training_episodes=150000
+training_episodes=250000
 b_print = 100
 
 training_number = 0
@@ -112,7 +112,7 @@ for lr in learning_rates:
                 cpu = dqn_player(configuration, device)
                 opp = heuristic_player(cpu.opponent, "mixed", chance=0.9)
 
-                filename="results/"+str(training_number) + "_lr-" + str(lr)+ "_gm-" + str(gm) + "_end-" + str(end) + "_layer-" + str(len(layer[0]))
+                filename="results_layer/"+str(training_number) + "_lr-" + str(lr)+ "_gm-" + str(gm) + "_end-" + str(end) + "_layer-" + str(len(layer[0]))
                 print("\n"+filename)
                 file = open(filename, "w")
 
