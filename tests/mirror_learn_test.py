@@ -13,7 +13,9 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
     momentum = 0
     max_momentum = 0
     games_string=""
-    plot=[]
+    losses_plt = []
+    wins_each_100 = 0
+    wins_plt = []
 
     print("Beginning", opponent_method, " training of ", num_episodes, " episodes")
     for i in tqdm(range(num_episodes), desc=opponent_method+" training (" + str(num_episodes)+ ")"):
@@ -39,7 +41,6 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             turn += 1
         
         if (game.winner() == player_model.color):
-            # print("Ganhou!!! (", wins+1, ")")
             cpu.wins += 1
             cpu.win_reward(action, state, game.zero_board())
             cpu.win_reward(action, state, game.zero_board())
@@ -47,6 +48,7 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             cpu.lose_reward_turn_influenced(op_action, op_state, game.zero_board(), turn)
             wins+=1
             momentum +=1
+            wins_each_100+=1
             if (momentum > max_momentum):
                 max_momentum = momentum
         else:
@@ -59,7 +61,8 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         if (i%cpu.policy_net_update == 0 and i > 0):
             loss = cpu.optimize_policy_net()
             if (loss is not None):
-                plot.append(loss.item())
+                losses_plt.append(loss.item())
+            #     plot.append(loss.item())
 
         if (i%cpu.target_net_update == 0 and i > 0):
             cpu.optimize_target_net()
@@ -69,22 +72,44 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             games_string += "Winner: " + str(game.winner())
             games_string += game.__str__() + "\n"
 
-    # plt.plot(plot)
-    # plt.show()
+        if (i%100==0 and i > 0):
+            wins_plt.append(wins_each_100)
+            wins_each_100 = 0
 
+    print("Number of games: " + str(num_episodes))
+    print("Agent: Mirror")
+    print("Opponent: " + str(opponent_method))
+    if (opponent_method == "mixed"):
+        print("chance of eletric: 0.8")
     print("Number of wins: " + str(wins))
     print("Win percentage: " + str(wins/num_episodes))
     print("Max consecutives wins: " + str(max_momentum) + "\n")
     if (filename != False):
         file = open(filename, "w")
+        file.write("Number of games: " + str(num_episodes))
+        file.write("Agent: Mirror")
+        file.write("Opponent: " + str(opponent_method))
+        if (opponent_method == "mixed"):
+            file.write("chance of eletric: 0.8")
         file.write("\nNumber of wins: " + str(wins))
         file.write("\nWin percentage: " + str(wins/num_episodes))
         file.write("\nMax consecutives wins: " + str(max_momentum))
         file.write("\n\n")
         file.write(games_string)
-        # file.write(str(plot))
         file.write("\n\n")
-        file.close 
+        file.close
+
+        plt.subplot(211)
+        plt.title('Wins each 100 games')
+        print(wins_plt)
+        plt.plot(wins_plt)
+        plt.subplot(212)
+        plt.title('Loss function value')
+        plt.plot(losses_plt)
+
+        plt.subplots_adjust(hspace=0.5)
+        plt.savefig(filename + '_image.png')
+        plt.clf()
 
 
 color = white

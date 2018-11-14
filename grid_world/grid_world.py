@@ -26,7 +26,7 @@ class Grid_world():
         self.traps = special_spaces[1:-1]
         
         self.action_dict = {"up": 0, "right": 1, "down": 2, "left": 3}
-        self.action_coords = [(-1, 0), (0, 1), (1, 0), (0, -1)] # translations
+        self.action_coords = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
         self.reset()
 
