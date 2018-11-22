@@ -41,7 +41,6 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
             turn += 1
         
         if (game.winner() == player_model.color):
-            cpu.wins += 1
             cpu.win_reward(action, state, game.zero_board())
             cpu.win_reward(action, state, game.zero_board())
             cpu.lose_reward_turn_influenced(op_action, op_state, game.zero_board(), turn)
@@ -101,7 +100,6 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
 
         plt.subplot(211)
         plt.title('Wins each 100 games')
-        print(wins_plt)
         plt.plot(wins_plt)
         plt.subplot(212)
         plt.title('Loss function value')
@@ -112,17 +110,17 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         plt.clf()
 
 
-color = white
+color = black
 save = True
 
 print(device, "\n")
 if (torch.cuda.is_available()):
     torch.backends.cudnn.benchmark = True
 
-cpu = dqn_player(config(white), device)
+cpu = dqn_player(config(color), device)
 for ep in training_regime:
     training(cpu, *ep)
     
 if (save):
-    torch.save(cpu.policy_net, 'white_train_7.pt')
+    torch.save(cpu.policy_net, 'black_train_5_board.pt')
 

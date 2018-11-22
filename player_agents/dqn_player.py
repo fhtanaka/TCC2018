@@ -25,10 +25,6 @@ class dqn_player():
         self.policy_net_update = config.policy_net_update
         self.target_net_update = config.target_net_update
 
-        self.policy_loss = 0
-        self.target_loss = float("inf")
-        self.wins = 0
-        self.old_wins = 1
 
         # This part is for the network
         if (model != False):
@@ -112,16 +108,6 @@ class dqn_player():
 
     def optimize_target_net(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())
-        # if (self.policy_loss < self.target_loss or self.wins >= self.old_wins):
-        #     self.target_net.load_state_dict(self.policy_net.state_dict())
-        #     self.target_loss = self.policy_loss
-        #     self.policy_loss = 0
-        #     if (self.wins >= self.old_wins): 
-        #         self.old_wins = self.wins
-        #         self.wins = 0
-        # else:
-        #     self.policy_net.load_state_dict(self.target_net.state_dict())
-        #     self.policy_loss = 0
 
     def optimize_policy_net(self):
         if len(self.memory) < self.batch_size:
@@ -149,7 +135,6 @@ class dqn_player():
 
         # Compute Huber loss
         loss = self.criterion(state_action_values, expected_state_action_values.unsqueeze(1))
-        self.policy_loss += loss
 
         # Optimize the model
         self.optimizer.zero_grad()

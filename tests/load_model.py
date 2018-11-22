@@ -22,31 +22,20 @@ def training(player_model, num_episodes, opponent_method, filename=False, boards
         while (game.winner() == None):
             
             if (turn%2 == player_model.color):
-                state = torch.tensor(game.super_board)
                 action = cpu.select_valid_action(game)
                 game.play(game.action_to_index(action))
             else:
                 opponent.play(game)
-                if (game.winner() == None and turn != 0):
-                    cpu.play_reward(action, state, torch.tensor(game.super_board))
             turn += 1
         
         if (game.winner() == player_model.color):
-            cpu.win_reward(action, state, game.zero_board())
             wins+=1
             momentum +=1
             if (momentum > max_momentum):
                 max_momentum = momentum
         else:
-            cpu.lose_reward_turn_influenced(action, state, game.zero_board(), turn)
             momentum = 0
         plot.append(wins)
-
-        if (i%cpu.policy_net_update == 0):
-            cpu.optimize_policy_net()
-
-        if (i%cpu.target_net_update == 0):
-            cpu.optimize_target_net()
 
         if (i%boards_to_print == 1):
             games_string += "\nGame " + str(i) + ":\n"
@@ -76,7 +65,7 @@ print(device, "\n")
 if (torch.cuda.is_available()):
     torch.backends.cudnn.benchmark = True
 
-cpu = dqn_player(config(white), device)
+cpu = dqn_player(config(white), device, model="white_train.pt")
 for ep in training_regime:
     training(cpu, *ep)
     

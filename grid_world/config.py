@@ -1,13 +1,13 @@
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-num_episodes = 10000
+num_episodes = 1000
 
 class config ():
     # game config
     def __init__(self):
         self.board_size = 5
-        self.special = 8
+        self.special = 2
         self.padding = 0 # size of padding for neurohex_client
         # netowrk config
         self.channels = 1

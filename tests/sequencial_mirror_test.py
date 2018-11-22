@@ -81,8 +81,8 @@ def training (player_model, num_episodes, opponent_model, number, file=False, fi
 
 
     if (file != False):
-        file.write("Number of games: " + str(num_episodes))
-        file.write("Agent: Mirror 0.8")
+        file.write("Number of games: " + str(num_episodes) + "\n")
+        file.write("Agent: Mirror 0.8\n")
         file.write("\nNumber of wins: " + str(wins))
         file.write("\nWin percentage: " + str(wins/num_episodes))
         file.write("\nMax consecutives wins: " + str(max_momentum))
@@ -109,10 +109,11 @@ if (torch.cuda.is_available()):
     torch.backends.cudnn.benchmark = True
 
 
-learning_rates = [0.1, 0.01]
-gamma = [0.9, 0.8]
-eps_end = [0.1, 0.25]
-layers = [([48], [2]), ([48, 384], [2, 2])]
+learning_rates = [0.01]
+gamma = [0.8]
+eps_end = [0.1]
+layers = [([48, 384], [2, 2])]
+boards = [9]
 
 # learning_rates = [0.1, 0.01]
 # gamma = [0.9, 0.8, 0.99]
@@ -124,7 +125,7 @@ layers = [([48], [2]), ([48, 384], [2, 2])]
 # eps_end = [0.1]
 # layers = [([48, 384], [2, 2])]
 
-training_episodes=300000
+training_episodes=100000
 b_print = 100
 
 training_number = 0
@@ -132,28 +133,33 @@ for lr in learning_rates:
     for gm in gamma:
         for end in eps_end:
             for layer in layers:
-                configuration = config(
-                    lr=lr, 
-                    gamma=gm, 
-                    eps_end=end, 
-                    conv_layers=layer[0],
-                    kernel=layer[1]
-                    )
-                cpu = dqn_player(configuration, device)
-                opp = heuristic_player(cpu.opponent, "mixed", chance=0.8)
+                for board in boards:
+                    configuration = config(
+                        board_size=board,
+                        lr=lr, 
+                        gamma=gm, 
+                        eps_end=end, 
+                        conv_layers=layer[0],
+                        kernel=layer[1]
+                        )
+                    cpu = dqn_player(configuration, device)
+                    opp = heuristic_player(cpu.opponent, "mixed", chance=0.8)
 
-                filename="results_graphics2/"+str(training_number) + "_lr-" + str(lr)+ "_gm-" + str(gm) + "_end-" + str(end) + "_layer-" + str(len(layer[0]))
-                print("\n"+filename)
-                file = open(filename, "w")
+                    filename="results_boards/"+"3_board-"+str(board) + "_lr-" + str(lr)+ "_gm-" + str(gm) + "_end-" + str(end) + "_layer-" + str(len(layer[0]))
+                    # filename="results_boards/"+str(training_number)+"_board-"+str(board) + "_lr-" + str(lr)+ "_gm-" + str(gm) + "_end-" + str(end) + "_layer-" + str(len(layer[0]))
 
-                file.write("lr-" + str(lr) + "\n")
-                file.write("gamma-" + str(gm) + "\n")
-                file.write("end-" + str(end) + "\n")
-                file.write("layers-" + str(layer) + "\n\n")
+                    print("\n"+filename)
+                    file = open(filename, "w")
 
-                training(cpu, training_episodes, opp, training_number, file=file, filename=filename, boards_to_print=b_print)
+                    file.write("board-" + str(board) + "\n")
+                    file.write("lr-" + str(lr) + "\n")
+                    file.write("gamma-" + str(gm) + "\n")
+                    file.write("end-" + str(end) + "\n")
+                    file.write("layers-" + str(layer) + "\n\n")
 
-                file.close()
-                training_number+=1
+                    training(cpu, training_episodes, opp, training_number, file=file, filename=filename, boards_to_print=b_print)
+
+                    file.close()
+                    training_number+=1
 
 
